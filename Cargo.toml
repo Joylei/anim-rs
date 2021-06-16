@@ -1,0 +1,20 @@
+[package]
+name = "anim"
+version = "0.1.0"
+authors = ["joylei <leingliu@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = ["local", "iced-backend"]
+local = ["parking_lot"]
+iced-backend = ["iced_native"]
+
+[dependencies]
+impl-trait-for-tuples = "0.2.1"
+iced_native = { version="0.4", optional=true, default-features=false }
+parking_lot = { version="0.11", optional=true }
+
+[dev-dependencies]
+iced = { version="0.3", features=["tokio"] }
