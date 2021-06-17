@@ -1,7 +1,7 @@
 use anim::{
     easing,
     local::{self as animator, Timeline},
-    timeline::{self, Options, Status},
+    timeline::{Options, Status},
 };
 use iced::{
     button, Align, Application, Button, Clipboard, Column, Command, Container, HorizontalAlignment,
@@ -38,7 +38,7 @@ impl Application for State {
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
         let mut timeline: Timeline<_> =
-            Options::new(Size::new(100.0, 20.0), Size::new(500.0, 200.0))
+            Options::new(Size::new(130.0, 30.0), Size::new(500.0, 200.0))
                 .duration(Duration::from_secs(2))
                 .auto_reverse(true)
                 .easing(easing::bounce_ease())

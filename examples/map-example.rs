@@ -1,7 +1,8 @@
 use anim::{
     easing,
     local::{self as animator, Timeline},
-    timeline::{self, Options, Status},
+    timeline::{self, Builder, Options, Status},
+    Animation,
 };
 use iced::{
     button, Application, Button, Clipboard, Command, Container, HorizontalAlignment, Length, Size,
@@ -34,22 +35,19 @@ impl Application for State {
         let app = Self {
             btn_test: Default::default(),
             timeline: animator::timeline(
-                Options::new(Size::new(100.0, 20.0), Size::new(500.0, 200.0))
+                Options::new(Size::new(130.0, 30.0), Size::new(500.0, 200.0))
                     .duration(Duration::from_secs(2))
                     .auto_reverse(true)
                     .easing(easing::bounce_ease())
-                    .times(3),
-            )
-            .map(|size, status| {
-                if status == Status::Completed {
-                    (Length::Fill, Length::Fill)
-                } else {
-                    (
-                        Length::Units(size.width as u16),
-                        Length::Units(size.height as u16),
-                    )
-                }
-            }),
+                    .times(3)
+                    .build()
+                    .map(|size| {
+                        (
+                            Length::Units(size.width as u16),
+                            Length::Units(size.height as u16),
+                        )
+                    }),
+            ),
         };
         (app, Command::none())
     }

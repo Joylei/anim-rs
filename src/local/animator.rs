@@ -1,11 +1,10 @@
 use super::timeline::{Timeline, TimelineEx};
 use crate::{
     core::timeline::Timeline as CoreTimeline,
-    timeline::{Builder, Options, Status, TimelineId},
-    Animatable,
+    timeline::{Boxed, Status, TimelineId},
 };
 use parking_lot::{Mutex, RwLock, RwLockUpgradableReadGuard};
-use std::{collections::HashMap, rc::Rc, time::Instant};
+use std::{collections::HashMap, rc::Rc};
 
 thread_local! {
     /// thread local manager
@@ -15,49 +14,41 @@ thread_local! {
 }
 
 /// build a thread-local based [`Timeline`], which attaches to current thread once created
-pub fn timeline<T>(opts: Options<T>) -> Timeline<T>
+pub fn timeline<F, T>(animation: F) -> Timeline<T>
 where
-    T: Animatable + 'static,
+    F: Into<Boxed<T>> + 'static,
+    T: 'static,
 {
-    let timeline = opts.build();
+    let timeline: CoreTimeline<_> = CoreTimeline::new(animation);
     let shared = MANAGER.with(|m| m.shared.clone());
     let wrapper = TimelineWrapper::new(timeline, shared);
     wrapper.into()
 }
 
 /// update current thread associated [`Timeline`]s
+///
+/// you should call it only in one place
 pub fn update() {
     MANAGER.with(|m| m.update());
 }
 
-pub(crate) struct TimelineWrapper<T: Animatable> {
+pub(crate) struct TimelineWrapper<T> {
     id: TimelineId,
     pub(crate) inner: Rc<Mutex<Inner<T>>>,
     shared: Shared,
 }
 
-pub(crate) struct Inner<T: Animatable> {
+pub(crate) struct Inner<T> {
     pub(crate) timeline: CoreTimeline<T>,
-    pub(crate) cache: Option<(Instant, Status, T)>,
     scheduled: bool,
 }
 
-impl<T: Animatable> Inner<T> {
-    pub(crate) fn update(&mut self, time: Instant) -> Status {
-        let status = self.timeline.update(time);
-        let value = self.timeline.value();
-        self.cache = Some((time, status, value));
-        status
-    }
-}
-
-impl<T: Animatable> TimelineWrapper<T> {
+impl<T> TimelineWrapper<T> {
     fn new(timeline: CoreTimeline<T>, shared: Shared) -> Self {
         Self {
             id: timeline.id(),
             inner: Rc::new(Mutex::new(Inner {
                 timeline,
-                cache: None,
                 scheduled: false,
             })),
             shared,
@@ -70,25 +61,17 @@ impl<T: Animatable> TimelineWrapper<T> {
     }
 }
 
-impl<T: Animatable + 'static> TimelineEx<T> for TimelineWrapper<T> {
+impl<T: 'static> TimelineEx<T> for TimelineWrapper<T> {
     #[inline]
     fn status(&self) -> Status {
         let state = &*self.inner.lock();
-        if let Some((_, status, _)) = state.cache.as_ref() {
-            *status
-        } else {
-            state.timeline.status()
-        }
+        state.timeline.status()
     }
 
     #[inline]
     fn value(&self) -> T {
         let state = &*self.inner.lock();
-        if let Some((_, _, value)) = state.cache.as_ref() {
-            value.clone()
-        } else {
-            state.timeline.value()
-        }
+        state.timeline.value()
     }
 
     #[inline]
@@ -96,8 +79,6 @@ impl<T: Animatable + 'static> TimelineEx<T> for TimelineWrapper<T> {
         {
             let state = &mut *self.inner.lock();
             state.timeline.begin();
-            state.cache = None; //reset cache
-            state.scheduled = true;
         }
         self.shared.schedule(Rc::clone(&self.inner));
     }
@@ -105,11 +86,8 @@ impl<T: Animatable + 'static> TimelineEx<T> for TimelineWrapper<T> {
     #[inline]
     fn stop(&self) {
         {
-            let time = Instant::now();
             let state = &mut *self.inner.lock();
             state.timeline.stop();
-            state.update(time);
-            state.cache = None; //reset cache
         }
 
         let id = self.id;
@@ -119,10 +97,8 @@ impl<T: Animatable + 'static> TimelineEx<T> for TimelineWrapper<T> {
     #[inline]
     fn pause(&self) {
         {
-            let time = Instant::now();
             let state = &mut *self.inner.lock();
             state.timeline.pause();
-            state.update(time);
         }
         let id = self.id;
         self.shared.cancel(id);
@@ -139,7 +115,7 @@ impl<T: Animatable + 'static> TimelineEx<T> for TimelineWrapper<T> {
     }
 }
 
-impl<T: Animatable> Drop for TimelineWrapper<T> {
+impl<T> Drop for TimelineWrapper<T> {
     fn drop(&mut self) {
         let id = self.id;
         let scheduled = self.scheduled();
@@ -151,7 +127,7 @@ impl<T: Animatable> Drop for TimelineWrapper<T> {
     }
 }
 
-impl<T: Animatable + 'static> From<TimelineWrapper<T>> for Timeline<T> {
+impl<T: 'static> From<TimelineWrapper<T>> for Timeline<T> {
     #[inline]
     fn from(src: TimelineWrapper<T>) -> Self {
         Timeline::new(src)
@@ -162,7 +138,7 @@ trait TimelineControl {
     /// timeline unique id
     fn id(&self) -> TimelineId;
     /// update timeline
-    fn update(&self, time: Instant) -> Status;
+    fn update(&self) -> Status;
 
     /// on schedule into [`TimelineScheduler`]
     fn on_schedule(&self);
@@ -171,7 +147,7 @@ trait TimelineControl {
     fn on_remove(&self);
 }
 
-impl<T: Animatable> TimelineControl for Rc<Mutex<Inner<T>>> {
+impl<T> TimelineControl for Rc<Mutex<Inner<T>>> {
     #[inline]
     fn id(&self) -> TimelineId {
         let state = &*self.lock();
@@ -179,9 +155,9 @@ impl<T: Animatable> TimelineControl for Rc<Mutex<Inner<T>>> {
     }
 
     #[inline]
-    fn update(&self, time: Instant) -> Status {
+    fn update(&self) -> Status {
         let state = &mut *self.lock();
-        state.update(time)
+        state.timeline.update()
     }
 
     #[inline]
@@ -203,10 +179,9 @@ struct Shared(Rc<RwLock<HashMap<TimelineId, Box<dyn TimelineControl + 'static>>>
 impl Shared {
     fn update(&self) {
         let mut holder = Vec::new();
-        let now = Instant::now();
         let state = self.0.upgradable_read();
         for (id, item) in state.iter() {
-            let status = item.update(now);
+            let status = item.update();
             if status == Status::Completed || status == Status::Paused {
                 holder.push(*id);
             }
