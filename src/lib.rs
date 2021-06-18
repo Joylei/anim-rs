@@ -60,8 +60,11 @@ use anim::{Options, Timeline, Animation, easing};
 Then, build and start your animation:
 
 ```rust
+use std::time::Duration;
+use anim::{Options, Timeline, Animation, easing};
+
 let mut timeline = Options::new(20,100).easing(easing::bounce_ease())
-    .duration(Duration::from_secs(1))
+    .duration(Duration::from_millis(300))
     .begin_animation();
 
 loop {

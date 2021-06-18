@@ -16,10 +16,9 @@ pub struct Skip<T: Animation> {
 }
 
 impl<T: Animation> Skip<T> {
+    #[inline(always)]
     pub(super) fn new(src: T, progress: Duration) -> Self {
-        if progress < DURATION_ZERO {
-            panic!("progress must be >=0");
-        }
+        assert!(progress >= DURATION_ZERO);
         Self { src, progress }
     }
 }
@@ -28,7 +27,6 @@ impl<T: Animation> BaseAnimation for Skip<T> {
     type Item = T::Item;
     #[inline]
     fn duration(&self) -> Option<Duration> {
-        debug_assert!(self.progress >= DURATION_ZERO);
         self.src.duration().map(|d| {
             if d > self.progress {
                 d - self.progress
@@ -38,9 +36,8 @@ impl<T: Animation> BaseAnimation for Skip<T> {
         })
     }
 
-    #[inline]
+    #[inline(always)]
     fn animate(&self, elapsed: Duration) -> Self::Item {
-        debug_assert!(self.progress >= DURATION_ZERO);
         let elapsed = self.progress + elapsed;
         self.src.animate(elapsed)
     }

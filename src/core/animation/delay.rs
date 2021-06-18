@@ -18,9 +18,7 @@ pub struct Delay<T: Animation> {
 impl<T: Animation> Delay<T> {
     #[inline(always)]
     pub(super) fn new(src: T, delay: Duration) -> Self {
-        if delay < DURATION_ZERO {
-            panic!("delay must be >=0");
-        }
+        assert!(delay >= DURATION_ZERO);
         Self { src, delay }
     }
 }

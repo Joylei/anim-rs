@@ -15,7 +15,7 @@ pub struct Primitive<T: Animatable> {
 }
 
 impl<T: Animatable> Primitive<T> {
-    #[inline]
+    #[inline(always)]
     pub(crate) fn new(opt: Options<T>) -> Self {
         Self { opt }
     }
@@ -24,7 +24,7 @@ impl<T: Animatable> Primitive<T> {
 impl<T: Animatable> BaseAnimation for Primitive<T> {
     type Item = T;
 
-    #[inline]
+    #[inline(always)]
     fn duration(&self) -> Option<Duration> {
         match self.opt.repeat {
             RepeatBehavior::Count(count) => Some(self.opt.duration * count),
