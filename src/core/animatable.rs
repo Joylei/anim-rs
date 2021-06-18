@@ -61,15 +61,33 @@ impl_primitive!(i128);
 impl_primitive!(f32, float);
 impl_primitive!(f64, float);
 
-// bool does not make too much sense here
+impl Animatable for bool {
+    fn animate(&self, to: &Self, time: f64) -> Self {
+        if self != to {
+            if time == 1.0 {
+                return *to;
+            }
+        }
+        *self
+    }
+}
 
 impl Animatable for char {
     fn animate(&self, to: &Self, time: f64) -> Self {
+        if self == to {
+            return *self;
+        }
+
         let from_idx = *self as u32;
         let to_idx = *to as u32;
-        let n = from_idx.animate(&to_idx, time) as usize;
+        let idx = from_idx.animate(&to_idx, time) as u32;
+        let n = if from_idx > to_idx {
+            from_idx - idx
+        } else {
+            idx - from_idx
+        };
         let mut rng = *self..=*to;
-        match rng.nth(n) {
+        match rng.nth(n as usize) {
             Some(c) => c,
             None => *self,
         }
@@ -84,5 +102,43 @@ impl Animatable for Tuple {
 
     fn animate(&self, to: &Self, time: f64) -> Self {
         for_tuples!( (#( Tuple::animate(&self.Tuple, &to.Tuple, time) ),* ))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::Animatable;
+
+    #[test]
+    fn test_bool() {
+        let v = false.animate(&true, 0.0);
+        assert!(v == false);
+
+        let v = false.animate(&true, 0.5);
+        assert!(v == false);
+
+        let v = false.animate(&true, 1.0);
+        assert!(v == true);
+
+        let v = true.animate(&true, 0.3);
+        assert!(v == true);
+
+        let v = false.animate(&false, 0.2);
+        assert!(v == false);
+    }
+
+    #[test]
+    fn test_char() {
+        let v = 'a'.animate(&'e', 0.0);
+        assert_eq!(v, 'a');
+
+        let v = 'a'.animate(&'e', 0.5);
+        assert_eq!(v, 'c');
+
+        let v = 'a'.animate(&'e', 0.555);
+        assert_eq!(v, 'c');
+
+        let v = 'a'.animate(&'e', 1.0);
+        assert_eq!(v, 'e');
     }
 }
