@@ -62,7 +62,7 @@ For complex scenarios, please look at [examples](./examples/) to gain some ideas
 
 ## How to run the examples?
 
-### Example #2: `color-example`
+### Example #1: `color-example`
 
 This example shows you color animations:
 
@@ -70,7 +70,7 @@ This example shows you color animations:
 cargo run --release --example color-example
 ```
 
-### Example #1: `size-example`
+### Example #2: `size-example`
 
 This example shows you size animations:
 
