@@ -1,8 +1,8 @@
 # anim
-[![Test and Build](https://github.com/joylei/anim-rs/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/joylei/anim-rs/actions?query=workflow%3A%22Test+and+Build%22)
+<!-- [![Test and Build](https://github.com/joylei/anim-rs/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/joylei/anim-rs/actions?query=workflow%3A%22Test+and+Build%22)
 [![Documentation](https://docs.rs/anim/badge.svg)](https://docs.rs/anim)
 [![Crates.io](https://img.shields.io/crates/v/anim.svg)](https://crates.io/crates/anim)
-[![License](https://img.shields.io/crates/l/anim.svg)](https://github.com/joylei/anim-rs/blob/master/LICENSE)
+[![License](https://img.shields.io/crates/l/anim.svg)](https://github.com/joylei/anim-rs/blob/master/LICENSE) -->
 
 This is an animation library, works nicely with Iced and the others.
 
