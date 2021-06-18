@@ -122,7 +122,7 @@ pub trait Animation: BaseAnimation {
         Repeat::new(self, repeat)
     }
 
-    /// repeat animations for specified times
+    /// repeat your animation for specified times
     ///
     /// see [`Animation::repeat`]
     ///
@@ -135,7 +135,7 @@ pub trait Animation: BaseAnimation {
         Repeat::new(self, RepeatBehavior::Count(count))
     }
 
-    // repeat animations and never ends
+    // repeat your animation indefinitely
     ///
     /// see [`Animation::repeat`]
     #[inline]

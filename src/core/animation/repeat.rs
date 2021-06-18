@@ -7,7 +7,6 @@
 use super::{Animation, BaseAnimation};
 use crate::{core::RepeatBehavior, core::DURATION_ZERO};
 use std::time::Duration;
-
 /// repeat animations
 #[derive(Debug, Clone)]
 pub struct Repeat<T: Animation> {

@@ -10,12 +10,12 @@ use crate::{
 };
 use std::{fmt, time::Duration};
 
-/// repeat behavior for your animation
+/// how an [`crate::core::Animation`] repeats its simple duration
 #[derive(Debug, Clone, Copy)]
 pub enum RepeatBehavior {
-    /// repeat limited times, default 1
+    /// specifies the number of times the simple duration of a an [`crate::core::Animation`] plays. default 1
     Count(u32),
-    /// never end
+    /// The [`crate::core::Animation`] repeats indefinitely
     Forever,
 }
 
@@ -97,7 +97,8 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// loops forever
+    /// your [`crate::core::Animation`] repeats indefinitely
+    ///
     /// see [`Options::repeat()`]
     #[inline]
     pub fn forever(mut self) -> Self {
@@ -105,7 +106,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// loops for specified times
+    /// your [`crate::core::Animation`] repeats for specified times
     ///
     /// see [`Options::repeat()`]
     ///
