@@ -56,7 +56,7 @@ pub trait BaseAnimation {
 
 /// your animation, which outputs animated value based on the progressing time.
 ///
-/// Simply, you can think it as an [`Iterator`]. The difference is that an [Animation]
+/// Simply, you can think it as an [`Iterator`]. The difference is that an [`Animation`]
 /// always output some values.
 pub trait Animation: BaseAnimation {
     /// always delay for specified time when start

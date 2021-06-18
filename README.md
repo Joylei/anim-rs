@@ -4,7 +4,7 @@
 [![Crates.io](https://img.shields.io/crates/v/anim.svg)](https://crates.io/crates/anim)
 [![License](https://img.shields.io/crates/l/anim.svg)](https://github.com/joylei/anim-rs/blob/master/LICENSE) -->
 
-This is an animation library, works nicely with Iced and the others.
+This is an animation library, works nicely with [Iced](https://github.com/hecrj/iced)  and the others.
 
 ## Showcase
 
@@ -36,6 +36,18 @@ anim = { version="0.1", default-features = false }
 
 ## How to use?
 
+There are 3 important concepts in `anim`:
+- `Animatable`
+Types derived from `Animatable` means that its values can be calculated based on timing progress, with which you can create `Animation` objects.
+
+- `Animation`
+The `Animation` generates values based on its timing progress. You can construct a big `Animation`  from small ones.
+
+- `Timeline`
+With `Timeline` you can control your animations' lifetime.
+
+---
+
 For simple scenarios, you just need `Options`.
 
 ```rust
@@ -59,6 +71,7 @@ loop {
 ```
 
 For complex scenarios, please look at [examples](./examples/) to gain some ideas.
+
 
 ## How to run the examples?
 
