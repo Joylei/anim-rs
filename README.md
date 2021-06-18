@@ -4,7 +4,7 @@
 [![Crates.io](https://img.shields.io/crates/v/anim.svg)](https://crates.io/crates/anim)
 [![License](https://img.shields.io/crates/l/anim.svg)](https://github.com/joylei/anim-rs/blob/master/LICENSE) -->
 
-This is an animation library, works nicely with [Iced](https://github.com/hecrj/iced)  and the others.
+A framework independent animation library for rust, works nicely with Iced and the others [Iced](https://github.com/hecrj/iced)  and the others.
 
 ## Showcase
 

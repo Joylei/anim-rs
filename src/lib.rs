@@ -1,13 +1,13 @@
 // anim
 //
-// An animation library, works nicely with Iced and the others
+// A framework independent animation library for rust, works nicely with Iced and the others
 // Copyright: 2021, Joylei <leingliu@gmail.com>
 // License: MIT
 
 /*!
 # anim
 
-This is an animation library, works nicely with [Iced](https://github.com/hecrj/iced) and the others.
+This is a framework independent animation library for rust, works nicely with [Iced](https://github.com/hecrj/iced) and the others.
 
 ## Showcase
 

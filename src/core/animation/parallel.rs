@@ -1,6 +1,6 @@
 // anim
 //
-// An animation library, works nicely with Iced and the others
+// A framework independent animation library for rust, works nicely with Iced and the others
 // Copyright: 2021, Joylei <leingliu@gmail.com>
 // License: MIT
 
