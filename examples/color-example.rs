@@ -51,7 +51,7 @@ impl Application for State {
     }
 
     fn title(&self) -> String {
-        "Size animation example".to_owned()
+        "Color animation example".to_owned()
     }
 
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {

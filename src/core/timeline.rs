@@ -31,6 +31,29 @@ pub enum Status {
     Completed,
 }
 
+impl Status {
+    /// is animation idle?
+    #[inline(always)]
+    pub fn is_idle(&self) -> bool {
+        self == &Status::Idle
+    }
+    /// is animation in progress?
+    #[inline(always)]
+    pub fn is_animating(&self) -> bool {
+        self == &Status::Animating
+    }
+    /// is animation paused?
+    #[inline(always)]
+    pub fn is_paused(&self) -> bool {
+        self == &Status::Paused
+    }
+    /// is animation completed?
+    #[inline(always)]
+    pub fn is_completed(&self) -> bool {
+        self == &Status::Completed
+    }
+}
+
 /// animation state
 #[derive(Debug)]
 enum State {
