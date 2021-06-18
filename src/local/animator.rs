@@ -1,7 +1,14 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 use super::timeline::{Timeline, TimelineEx};
 use crate::{
     core::timeline::Timeline as CoreTimeline,
-    timeline::{Boxed, Status, TimelineId},
+    timeline::{Status, TimelineId},
+    Animation,
 };
 use parking_lot::{Mutex, RwLock, RwLockUpgradableReadGuard};
 use std::{collections::HashMap, rc::Rc};
@@ -14,15 +21,14 @@ thread_local! {
 }
 
 /// build a thread-local based [`Timeline`], which attaches to current thread once created
-pub fn timeline<F, T>(animation: F) -> Timeline<T>
+pub fn timeline<F>(animation: F) -> Timeline<F::Item>
 where
-    F: Into<Boxed<T>> + 'static,
-    T: 'static,
+    F: Animation + 'static,
 {
     let timeline: CoreTimeline<_> = CoreTimeline::new(animation);
     let shared = MANAGER.with(|m| m.shared.clone());
     let wrapper = TimelineWrapper::new(timeline, shared);
-    wrapper.into()
+    Timeline::new(wrapper)
 }
 
 /// update current thread associated [`Timeline`]s
@@ -109,9 +115,14 @@ impl<T: 'static> TimelineEx<T> for TimelineWrapper<T> {
         {
             let state = &mut *self.inner.lock();
             state.timeline.resume();
-            state.scheduled = true;
         }
         self.shared.schedule(Rc::clone(&self.inner));
+    }
+
+    #[inline]
+    fn reset(&self) {
+        let state = &mut *self.inner.lock();
+        state.timeline.reset();
     }
 }
 

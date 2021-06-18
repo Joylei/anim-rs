@@ -1,3 +1,9 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 use crate::core::Animatable;
 use iced_native::{Color, Point, Rectangle, Size, Vector};
 

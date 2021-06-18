@@ -1,7 +1,10 @@
-use anim::{
-    local::{self as animator, Timeline},
-    timeline::{self, Options},
-};
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
+use anim::{Options, Timeline};
 use iced::{
     button, Align, Application, Button, Clipboard, Color, Command, Container, HorizontalAlignment,
     Length, Row, Subscription, Text, VerticalAlignment,
@@ -42,7 +45,7 @@ impl Application for State {
                 .duration(Duration::from_secs(2))
                 .auto_reverse(true)
                 .forever()
-                .into(),
+                .begin_animation(),
         };
         (app, Command::none())
     }
@@ -54,14 +57,7 @@ impl Application for State {
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::Tick => {
-                let status = self.timeline.status();
-                match status {
-                    timeline::Status::Idle => {
-                        self.timeline.begin();
-                    }
-                    _ => {}
-                }
-                animator::update();
+                self.timeline.update();
             }
             _ => {}
         }
@@ -99,8 +95,8 @@ impl Application for State {
         Container::new(row)
             .align_x(iced::Align::Center)
             .align_y(iced::Align::Center)
-            .width(Length::Units(800))
-            .height(Length::Units(600))
+            .width(Length::Fill)
+            .height(Length::Fill)
             .into()
     }
 

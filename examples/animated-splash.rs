@@ -1,14 +1,17 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 // https://www.flutterclutter.dev/flutter/tutorials/beautiful-animated-splash-screen/2020/1108/
-use anim::{
-    local::{self as animator, Timeline},
-    timeline::{self, Boxed, Builder, Options, Status},
-    Animation,
-};
+use anim::{timeline::Status, Animation, Options, Timeline};
 use iced::{
-    canvas::{Cursor, Geometry},
-    Application, Canvas, Clipboard, Color, Command, Container, Element, HorizontalAlignment,
-    Length, Point, Rectangle, Subscription, Text, VerticalAlignment,
+    canvas::{self, Cursor, Geometry},
+    Align, Application, Button, Canvas, Clipboard, Color, Column, Command, Container, Element,
+    HorizontalAlignment, Length, Point, Rectangle, Subscription, Text, VerticalAlignment,
 };
+use iced_native::button;
 use std::time::Duration;
 
 fn main() {
@@ -17,14 +20,17 @@ fn main() {
 
 #[derive(Debug, Clone)]
 enum Message {
-    Idle,
     /// animation frame
     Tick,
+    Click1,
+    Click2,
 }
 
 struct State {
     timeline: Timeline<Raindrop>,
-    painter: HolderPainter,
+    painter: AnimationPainter,
+    btn_run1: button::State,
+    btn_run2: button::State,
 }
 
 impl Application for State {
@@ -34,8 +40,10 @@ impl Application for State {
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
         let app = Self {
-            timeline: animator::timeline(raindrop()),
+            timeline: raindrop_animation2().begin_animation(),
             painter: Default::default(),
+            btn_run1: Default::default(),
+            btn_run2: Default::default(),
         };
         (app, Command::none())
     }
@@ -47,18 +55,16 @@ impl Application for State {
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::Tick => {
-                let status = self.timeline.status();
-                match status {
-                    timeline::Status::Idle => {
-                        self.timeline.begin();
-                    }
-                    _ => {}
-                }
-                animator::update();
+                self.timeline.update();
                 self.painter.model = self.timeline.value();
                 self.painter.cache.clear();
             }
-            _ => {}
+            Message::Click1 => {
+                self.timeline = raindrop_animation().begin_animation();
+            }
+            Message::Click2 => {
+                self.timeline = raindrop_animation2().begin_animation();
+            }
         }
         Command::none()
     }
@@ -66,11 +72,36 @@ impl Application for State {
     fn view(&mut self) -> iced::Element<'_, Self::Message> {
         let status = self.timeline.status();
         let content: Element<Message> = if status == Status::Completed {
-            Text::new("Animation completed")
-                .horizontal_alignment(HorizontalAlignment::Center)
-                .vertical_alignment(VerticalAlignment::Center)
-                .width(Length::Fill)
-                .height(Length::Fill)
+            Column::new()
+                .spacing(10)
+                .width(Length::Shrink)
+                .height(Length::Shrink)
+                .align_items(Align::Center)
+                .push(
+                    Text::new("Animation completed")
+                        .horizontal_alignment(HorizontalAlignment::Center)
+                        .vertical_alignment(VerticalAlignment::Center)
+                        .width(Length::Shrink)
+                        .height(Length::Shrink),
+                )
+                .push(
+                    Button::new(
+                        &mut self.btn_run1,
+                        Text::new("Run Again with method 1?")
+                            .horizontal_alignment(HorizontalAlignment::Center)
+                            .vertical_alignment(VerticalAlignment::Center),
+                    )
+                    .on_press(Message::Click1),
+                )
+                .push(
+                    Button::new(
+                        &mut self.btn_run2,
+                        Text::new("Run Again with method 2?")
+                            .horizontal_alignment(HorizontalAlignment::Center)
+                            .vertical_alignment(VerticalAlignment::Center),
+                    )
+                    .on_press(Message::Click2),
+                )
                 .into()
         } else {
             Canvas::new(&mut self.painter)
@@ -94,25 +125,25 @@ impl Application for State {
 }
 
 #[derive(Default)]
-struct HolderPainter {
+struct AnimationPainter {
     model: Raindrop,
-    cache: iced::canvas::Cache,
+    cache: canvas::Cache,
 }
 
-impl iced::canvas::Program<Message> for HolderPainter {
+impl canvas::Program<Message> for AnimationPainter {
     fn draw(&self, bounds: Rectangle, _cursor: Cursor) -> Vec<Geometry> {
         let item = self.cache.draw(bounds.size(), |frame| {
             if self.model.drop_visible {
                 //use circle here instead of raindrop
                 let center = Point::new(bounds.width / 2.0, bounds.height * self.model.drop_pos);
-                let path = iced::canvas::Path::circle(center, self.model.drop_size as f32);
+                let path = canvas::Path::circle(center, self.model.drop_size as f32);
                 frame.fill(&path, Color::WHITE);
             } else {
                 let center = frame.center();
                 let max_radius = frame.width().max(frame.height());
                 let radius = max_radius * self.model.hole_size;
                 //out circle
-                let path = iced::canvas::Path::circle(center, radius);
+                let path = canvas::Path::circle(center, radius);
                 frame.fill(
                     &path,
                     Color {
@@ -121,7 +152,7 @@ impl iced::canvas::Program<Message> for HolderPainter {
                     },
                 );
                 //inner circle
-                let path = iced::canvas::Path::circle(center, radius / 2.0);
+                let path = canvas::Path::circle(center, radius / 2.0);
                 frame.fill(
                     &path,
                     Color {
@@ -154,10 +185,12 @@ impl Default for Raindrop {
     }
 }
 
-fn raindrop() -> Boxed<Raindrop> {
-    const MAX_DROP_SIZE: f32 = 20.0;
-    const MAX_DROP_POS: f32 = 0.5;
-    const MAX_HOLE_SIZE: f32 = 1.0;
+const MAX_DROP_SIZE: f32 = 20.0;
+const MAX_DROP_POS: f32 = 0.5;
+const MAX_HOLE_SIZE: f32 = 1.0;
+
+// staged animations, demo of chained animations
+fn raindrop_animation() -> impl Animation<Item = Raindrop> {
     let duration = Duration::from_millis(3000);
     let stage1 = Options::new(0.0, MAX_DROP_SIZE)
         .duration(duration.mul_f64(0.2))
@@ -186,7 +219,41 @@ fn raindrop() -> Boxed<Raindrop> {
             drop_pos: MAX_DROP_POS,
             hole_size: size,
         });
-    stage1.chain(stage2).chain(stage3).boxed()
+    stage1.chain(stage2).chain(stage3)
+}
+
+//demo of delay and parallel, think it in another way
+fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
+    let duration = Duration::from_millis(3000);
+    let drop_size = Options::new(0.0, MAX_DROP_SIZE)
+        .duration(duration.mul_f64(0.2))
+        .build();
+
+    let drop_pos = Options::new(0.0, MAX_DROP_POS)
+        .duration(duration.mul_f64(0.3))
+        .build()
+        .delay(duration.mul_f64(0.2));
+
+    //linear
+    let drop_visible = anim::linear(duration).map(|t| if t <= 0.5 { true } else { false });
+
+    let hole_size = Options::new(0.0, MAX_HOLE_SIZE)
+        .duration(duration.mul_f64(0.5))
+        .build()
+        .delay(duration.mul_f64(0.5));
+
+    drop_size
+        .zip(drop_pos)
+        .zip(drop_visible)
+        .zip(hole_size)
+        .map(
+            |(((drop_size, drop_pos), drop_visible), hole_size)| Raindrop {
+                drop_size,
+                drop_pos,
+                drop_visible,
+                hole_size,
+            },
+        )
 }
 
 mod style {

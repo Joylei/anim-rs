@@ -1,4 +1,10 @@
-//! animation library for iced
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
+//! animation library with iced or not
 #![warn(missing_docs)]
 
 mod core;

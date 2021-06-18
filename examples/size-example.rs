@@ -1,8 +1,10 @@
-use anim::{
-    easing,
-    local::{self as animator, Timeline},
-    timeline::{Options, Status},
-};
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
+use anim::{easing, timeline::Status, Options, Timeline};
 use iced::{
     button, Align, Application, Button, Clipboard, Column, Command, Container, HorizontalAlignment,
     Length, Row, Size, Subscription, Text, VerticalAlignment,
@@ -62,7 +64,7 @@ impl Application for State {
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::Tick => {
-                animator::update();
+                self.timeline.update();
             }
             Message::Start => {
                 let status = self.timeline.status();
@@ -148,8 +150,8 @@ impl Application for State {
             .align_x(iced::Align::Center)
             .align_y(iced::Align::Start)
             .padding(10)
-            .width(Length::Units(800))
-            .height(Length::Units(600))
+            .width(Length::Fill)
+            .height(Length::Fill)
             .into()
     }
 

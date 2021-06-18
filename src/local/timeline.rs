@@ -1,3 +1,9 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 use crate::core::timeline::Status;
 
 pub(crate) trait TimelineEx<T> {
@@ -7,6 +13,7 @@ pub(crate) trait TimelineEx<T> {
     fn stop(&self);
     fn pause(&self);
     fn resume(&self);
+    fn reset(&self);
 }
 
 /// thread local specialized timeline
@@ -54,6 +61,12 @@ impl<T> Timeline<T> {
     pub fn resume(&mut self) {
         self.0.resume()
     }
+
+    /// reset your animation if it's completed
+    #[inline]
+    pub fn reset(&mut self) {
+        self.0.resume()
+    }
 }
 
 impl<T> TimelineEx<T> for Timeline<T> {
@@ -84,6 +97,11 @@ impl<T> TimelineEx<T> for Timeline<T> {
 
     #[inline]
     fn resume(&self) {
+        self.0.resume()
+    }
+
+    #[inline]
+    fn reset(&self) {
         self.0.resume()
     }
 }

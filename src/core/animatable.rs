@@ -1,3 +1,9 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 use impl_trait_for_tuples::impl_for_tuples;
 
 ///  generates output values based on its timing progress

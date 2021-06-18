@@ -1,10 +1,16 @@
 [package]
 name = "anim"
 version = "0.1.0"
-authors = ["joylei <leingliu@gmail.com>"]
+description = "An animation library, works nicely with Iced and the others"
+readme = "README.md"
+license = "MIT"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+homepage = "https://github.com/Joylei/plotters-iced"
+repository = "https://github.com/Joylei/plotters-iced.git"
+documentation = "https://docs.rs/crate/plotters-iced/"
+keywords = ["animation", "iced"]
+categories = ["visualization"]
+authors = ["joylei <leingliu@gmail.com>"]
 
 [features]
 default = ["local", "iced-backend"]
@@ -13,6 +19,7 @@ iced-backend = ["iced_native"]
 
 [dependencies]
 impl-trait-for-tuples = "0.2.1"
+dyn-clone = "1"
 iced_native = { version="0.4", optional=true, default-features=false }
 parking_lot = { version="0.11", optional=true }
 

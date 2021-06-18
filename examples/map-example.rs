@@ -1,8 +1,13 @@
+// anim
+//
+// An animation library, works nicely with Iced and the others
+// Copyright: 2021, Joylei <leingliu@gmail.com>
+// License: MIT
+
 use anim::{
     easing,
-    local::{self as animator, Timeline},
-    timeline::{self, Builder, Options, Status},
-    Animation,
+    timeline::{self, Status},
+    Animation, Options, Timeline,
 };
 use iced::{
     button, Application, Button, Clipboard, Command, Container, HorizontalAlignment, Length, Size,
@@ -34,26 +39,25 @@ impl Application for State {
     fn new(_flags: ()) -> (Self, Command<Message>) {
         let app = Self {
             btn_test: Default::default(),
-            timeline: animator::timeline(
-                Options::new(Size::new(130.0, 30.0), Size::new(500.0, 200.0))
-                    .duration(Duration::from_secs(2))
-                    .auto_reverse(true)
-                    .easing(easing::bounce_ease())
-                    .times(3)
-                    .build()
-                    .map(|size| {
-                        (
-                            Length::Units(size.width as u16),
-                            Length::Units(size.height as u16),
-                        )
-                    }),
-            ),
+            timeline: Options::new(Size::new(130.0, 30.0), Size::new(500.0, 200.0))
+                .duration(Duration::from_secs(2))
+                .auto_reverse(true)
+                .easing(easing::bounce_ease())
+                .times(3)
+                .build()
+                .map(|size| {
+                    (
+                        Length::Units(size.width as u16),
+                        Length::Units(size.height as u16),
+                    )
+                })
+                .into(),
         };
         (app, Command::none())
     }
 
     fn title(&self) -> String {
-        "Size animation example".to_owned()
+        "Map example".to_owned()
     }
 
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
@@ -66,7 +70,7 @@ impl Application for State {
                     }
                     _ => {}
                 }
-                animator::update();
+                self.timeline.update();
             }
             _ => {}
         }
@@ -96,8 +100,8 @@ impl Application for State {
         Container::new(button)
             .align_x(iced::Align::Center)
             .align_y(iced::Align::Center)
-            .width(Length::Units(800))
-            .height(Length::Units(600))
+            .width(Length::Fill)
+            .height(Length::Fill)
             .into()
     }
 
