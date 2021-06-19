@@ -8,7 +8,7 @@ use super::{Animation, BaseAnimation};
 use crate::core::DURATION_ZERO;
 use std::time::Duration;
 
-/// delay your animation for a specified time
+/// delay your animation for a specified time; negative delay has no effect
 #[derive(Debug, Clone)]
 pub struct Delay<T: Animation> {
     src: T,
@@ -18,8 +18,16 @@ pub struct Delay<T: Animation> {
 impl<T: Animation> Delay<T> {
     #[inline(always)]
     pub(super) fn new(src: T, delay: Duration) -> Self {
-        assert!(delay >= DURATION_ZERO);
         Self { src, delay }
+    }
+
+    #[inline(always)]
+    fn delay(&self) -> Duration {
+        if self.delay > DURATION_ZERO {
+            self.delay
+        } else {
+            DURATION_ZERO
+        }
     }
 }
 
@@ -27,15 +35,14 @@ impl<T: Animation> BaseAnimation for Delay<T> {
     type Item = T::Item;
     #[inline(always)]
     fn duration(&self) -> Option<Duration> {
-        debug_assert!(self.delay >= Duration::from_secs(0));
-        self.src.duration().map(|d| self.delay + d)
+        self.src.duration().map(|d| self.delay() + d)
     }
 
     #[inline(always)]
     fn animate(&self, elapsed: Duration) -> Self::Item {
-        debug_assert!(self.delay >= Duration::from_secs(0));
-        let elapsed = if elapsed > self.delay {
-            elapsed - self.delay
+        let delay = self.delay();
+        let elapsed = if elapsed > delay {
+            elapsed - delay
         } else {
             DURATION_ZERO
         };

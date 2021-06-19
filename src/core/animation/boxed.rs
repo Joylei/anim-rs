@@ -7,7 +7,7 @@
 use super::{Animation, BaseAnimation};
 use std::{fmt, time::Duration};
 
-/// wrapper for boxed ['Animation']
+/// wrapper for boxed [`Animation`]
 pub struct Boxed<T>(Box<dyn Animation<Item = T>>);
 
 impl<T> Boxed<T> {
