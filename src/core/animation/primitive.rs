@@ -49,6 +49,7 @@ impl<T: Animatable> BaseAnimation for Primitive<T> {
     }
 
     fn animate(&self, mut elapsed: Duration) -> Self::Item {
+        // TODO: optimize for T:Eq
         if let Some(duration) = self.duration() {
             // opt.duration<=0 || repeat count <=0
             if duration == DURATION_ZERO {

@@ -15,6 +15,7 @@ pub struct Parallel<A, B> {
 }
 
 impl<A, B> Parallel<A, B> {
+    #[inline(always)]
     pub(super) fn new(first: A, second: B) -> Self {
         Self { first, second }
     }
@@ -26,7 +27,7 @@ where
     B: Animation,
 {
     type Item = (A::Item, B::Item);
-
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         if let Some(first) = self.first.duration() {
             if let Some(second) = self.second.duration() {
