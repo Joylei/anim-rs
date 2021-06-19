@@ -119,8 +119,13 @@ impl Application for State {
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
-        const FPS: f32 = 60.0;
-        iced::time::every(Duration::from_secs_f32(1.0 / FPS)).map(|_tick| Message::Tick)
+        let status = self.timeline.status();
+        if status.is_animating() {
+            const FPS: f32 = 60.0;
+            iced::time::every(Duration::from_secs_f32(1.0 / FPS)).map(|_tick| Message::Tick)
+        } else {
+            iced::Subscription::none()
+        }
     }
 }
 
