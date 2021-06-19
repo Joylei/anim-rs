@@ -67,6 +67,7 @@ impl<T: Animatable> Options<T> {
     }
 
     /// auto reverse animation when it reaches the end; default false.
+    /// Note: it will not increase the duration or repeat times.
     ///
     /// auto_reverse | effect
     /// ------------- | -------------------
@@ -89,7 +90,9 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// animation duration, this animation will last for how long
+    /// animation simple duration, this animation will last for how long if it plays once.
+    ///
+    /// If [`Options::repeat()`] is specified, the animation might play more than once.
     #[inline]
     pub fn duration(mut self, duration: Duration) -> Self {
         self.duration = duration;
