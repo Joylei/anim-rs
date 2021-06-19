@@ -66,7 +66,13 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// auto reverse animation when completed
+    /// auto reverse animation when it reaches the end; default false.
+    ///
+    /// auto_reverse | effect
+    /// ------------- | -------------------
+    /// false             | from -> to
+    /// true              | from -> to -> from
+    ///
     #[inline]
     pub fn auto_reverse(mut self, auto_reverse: bool) -> Self {
         self.auto_reverse = auto_reverse;
@@ -113,9 +119,7 @@ impl<T: Animatable> Options<T> {
     /// panics if count==0
     #[inline]
     pub fn times(mut self, count: u32) -> Self {
-        if count == 0 {
-            panic!("count must >=1")
-        }
+        assert!(count > 0);
         self.repeat = RepeatBehavior::Count(count);
         self
     }

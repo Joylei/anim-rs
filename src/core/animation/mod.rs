@@ -64,7 +64,7 @@ pub trait BaseAnimation {
 /// Simply, you can think it as an [`Iterator`]. The difference is that an [`Animation`]
 /// always output some values.
 pub trait Animation: BaseAnimation {
-    /// always delay for specified time when start
+    /// always delay for specified time when play current animation; negative delay has no effect
     #[inline(always)]
     fn delay(self, delay: Duration) -> Delay<Self>
     where
@@ -73,7 +73,7 @@ pub trait Animation: BaseAnimation {
         Delay::new(self, delay)
     }
 
-    /// always delay for specified time when start
+    /// always delay for specified time when play current animation
     #[inline(always)]
     fn delay_ms(self, millis: u64) -> Delay<Self>
     where
@@ -82,7 +82,7 @@ pub trait Animation: BaseAnimation {
         Delay::new(self, Duration::from_millis(millis))
     }
 
-    /// always move forward for specified time when start
+    /// always move forward for specified time when play current animation
     #[inline(always)]
     fn skip(self, progress: Duration) -> Skip<Self>
     where
@@ -101,7 +101,7 @@ pub trait Animation: BaseAnimation {
         Map::new(self, f)
     }
 
-    /// chain two animations
+    /// chain two animations, play in the chained order
     #[inline(always)]
     fn chain<Other>(self, other: Other) -> Chain<Self, Other>
     where
@@ -146,7 +146,7 @@ pub trait Animation: BaseAnimation {
         Repeat::new(self, RepeatBehavior::Forever)
     }
 
-    /// parallel animations, run at the same time until the longest one finishes
+    /// parallel animations, play at the same time until the longest one finishes
     #[inline(always)]
     fn parallel<Other>(self, other: Other) -> Parallel<Self, Other>
     where
@@ -156,7 +156,7 @@ pub trait Animation: BaseAnimation {
         Parallel::new(self, other)
     }
 
-    /// parallel animations, run at the same time until the longest one finishes.
+    /// parallel animations, play at the same time until the longest one finishes.
     ///
     /// alias for [`Animation::parallel()`]
     #[inline(always)]
@@ -188,7 +188,7 @@ pub trait Animation: BaseAnimation {
         Boxed::new(self)
     }
 
-    /// build [`Timeline`] and start animation
+    /// build [`Timeline`] and start to play the animation
     #[inline(always)]
     fn begin_animation(self) -> Timeline<Self::Item>
     where
