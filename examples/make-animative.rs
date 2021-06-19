@@ -29,7 +29,7 @@ fn main() {
     let to = MyModel { a: 100.0, b: 100 };
     let mut timeline: Timeline<_> = Options::new(from, to)
         .duration(Duration::from_secs(2))
-        .times(1)
+        .times(1.5)
         .into();
 
     println!("start animation");

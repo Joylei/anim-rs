@@ -13,8 +13,8 @@ use std::{fmt, time::Duration};
 /// how an [`crate::core::Animation`] repeats its simple duration
 #[derive(Debug, Clone, Copy)]
 pub enum RepeatBehavior {
-    /// specifies the number of times the simple duration of a an [`crate::core::Animation`] plays. default 1
-    Count(u32),
+    /// specifies the number of times the simple duration of a an [`crate::core::Animation`] plays. default 1.0
+    Count(f32),
     /// The [`crate::core::Animation`] repeats indefinitely
     Forever,
 }
@@ -22,7 +22,7 @@ pub enum RepeatBehavior {
 impl Default for RepeatBehavior {
     #[inline]
     fn default() -> Self {
-        RepeatBehavior::Count(1)
+        RepeatBehavior::Count(1.0)
     }
 }
 
@@ -47,7 +47,7 @@ impl<T: Animatable> Options<T> {
             auto_reverse: false,
             begin_time: None,
             duration: Duration::from_millis(1000),
-            repeat: RepeatBehavior::Count(1),
+            repeat: Default::default(),
             easing: Box::new(easing::cubic_ease()),
         }
     }
@@ -90,7 +90,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// animation simple duration, this animation will last for how long if it plays once.
+    /// animation simple duration, this animation will last for how long if it plays once. default 1000ms.
     ///
     /// If [`Options::repeat()`] is specified, the animation might play more than once.
     #[inline]
@@ -119,10 +119,10 @@ impl<T: Animatable> Options<T> {
     ///
     /// see [`Options::repeat()`]
     ///
-    /// panics if count==0
+    /// panics if count<=0
     #[inline]
-    pub fn times(mut self, count: u32) -> Self {
-        assert!(count > 0);
+    pub fn times(mut self, count: f32) -> Self {
+        assert!(count >= 0.0);
         self.repeat = RepeatBehavior::Count(count);
         self
     }

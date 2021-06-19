@@ -12,51 +12,58 @@ use std::time::Duration;
 pub struct Repeat<T: Animation> {
     src: T,
     repeat: RepeatBehavior,
+    duration: Option<Duration>,
 }
 
 impl<T: Animation> Repeat<T> {
     #[inline(always)]
     pub(super) fn new(src: T, repeat: RepeatBehavior) -> Self {
-        if let RepeatBehavior::Count(limit) = repeat {
-            assert!(limit >= 1);
+        let duration = src.duration().and_then(|duration| {
+            debug_assert!(duration >= DURATION_ZERO);
+            if duration == DURATION_ZERO {
+                return Some(DURATION_ZERO);
+            }
+            match repeat {
+                RepeatBehavior::Count(count) => Some(duration.mul_f32(count)),
+                RepeatBehavior::Forever => None,
+            }
+        });
+        Self {
+            src,
+            repeat,
+            duration,
         }
-        Self { src, repeat }
     }
 }
 
 impl<T: Animation> BaseAnimation for Repeat<T> {
     type Item = T::Item;
-    #[inline]
+    #[inline(always)]
     fn duration(&self) -> Option<Duration> {
-        match self.repeat {
-            RepeatBehavior::Count(count) => self.src.duration().map(|v| v * count),
-            RepeatBehavior::Forever => {
-                if let Some(v) = self.src.duration() {
-                    if v == DURATION_ZERO {
-                        return Some(DURATION_ZERO);
-                    }
-                }
-                None
-            }
-        }
+        self.duration
     }
 
     #[inline]
-    fn animate(&self, elapsed: Duration) -> Self::Item {
-        let duration = match self.src.duration() {
+    fn animate(&self, mut elapsed: Duration) -> Self::Item {
+        let simple_duration = match self.src.duration() {
             Some(duration) => duration,
             None => {
                 return self.src.animate(elapsed);
             }
         };
-        let time = elapsed.as_secs_f64() / duration.as_secs_f64();
-        let count = time.floor();
-        if let RepeatBehavior::Count(limit) = self.repeat {
-            if count as u32 >= limit {
-                return self.src.animate(duration);
+
+        if let Some(duration) = self.duration {
+            if elapsed > duration {
+                elapsed = duration;
             }
         }
-        let time = time - count;
-        self.src.animate(duration.mul_f64(time))
+
+        let time = elapsed.as_secs_f64() / simple_duration.as_secs_f64();
+        let count = time.floor();
+        let mut time = time - count;
+        if count > 0.0 && time == 0.0 {
+            time = 1.0
+        };
+        self.src.animate(simple_duration.mul_f64(time))
     }
 }

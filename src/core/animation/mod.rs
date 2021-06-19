@@ -128,7 +128,7 @@ pub trait Animation: BaseAnimation {
     ///
     /// panics if count == 0
     #[inline(always)]
-    fn times(self, count: u32) -> Repeat<Self>
+    fn times(self, count: f32) -> Repeat<Self>
     where
         Self: Sized,
     {
@@ -248,6 +248,48 @@ mod test {
     }
 
     #[test]
+    fn test_primitive_const() {
+        let animation = Options::new(1.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .build();
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_primitive_duration_zero() {
+        let animation = Options::new(1.0, 2.0)
+            .easing(easing::linear())
+            .duration(DURATION_ZERO)
+            .auto_reverse(false)
+            .build();
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
     fn test_primitive_reverse() {
         let animation = Options::new(0.0, 1.0)
             .easing(easing::linear())
@@ -278,7 +320,7 @@ mod test {
         let animation = Options::new(0.0, 1.0)
             .easing(easing::linear())
             .duration(Duration::from_millis(1000))
-            .times(2)
+            .times(2.0)
             .auto_reverse(false)
             .build();
 
@@ -289,7 +331,7 @@ mod test {
         assert_eq!(v, 0.5);
 
         let v = animation.animate(Duration::from_millis(1000));
-        assert_eq!(v, 0.0);
+        assert_eq!(v, 1.0);
 
         let v = animation.animate(Duration::from_millis(1500));
         assert_eq!(v, 0.5);
@@ -454,7 +496,7 @@ mod test {
             .duration(Duration::from_millis(1000))
             .auto_reverse(false)
             .build()
-            .times(2);
+            .times(2.0);
 
         let v = animation.animate(DURATION_ZERO);
         assert_eq!(v, 0.0);
@@ -463,7 +505,7 @@ mod test {
         assert_eq!(v, 0.5);
 
         let v = animation.animate(Duration::from_millis(1000));
-        assert_eq!(v, 0.0);
+        assert_eq!(v, 1.0);
 
         let v = animation.animate(Duration::from_millis(1500));
         assert_eq!(v, 0.5);

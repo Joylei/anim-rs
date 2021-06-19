@@ -43,7 +43,7 @@ impl Application for State {
                 .duration(Duration::from_secs(2))
                 .auto_reverse(true)
                 .easing(easing::bounce_ease())
-                .times(3)
+                .times(3.0)
                 .build()
                 .map(|size| {
                     (

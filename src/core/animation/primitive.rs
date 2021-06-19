@@ -5,19 +5,38 @@
 // License: MIT
 
 use super::BaseAnimation;
-use crate::core::{Animatable, Options, RepeatBehavior};
+use crate::{
+    core::{Animatable, Options, RepeatBehavior},
+    DURATION_ZERO,
+};
 use std::time::Duration;
 
 /// primitive animation which is built from [`Options`]
 #[derive(Debug, Clone)]
 pub struct Primitive<T: Animatable> {
     opt: Options<T>,
+    duration: Option<Duration>,
 }
 
 impl<T: Animatable> Primitive<T> {
     #[inline(always)]
     pub(crate) fn new(opt: Options<T>) -> Self {
-        Self { opt }
+        let duration = if opt.duration <= DURATION_ZERO {
+            Some(DURATION_ZERO)
+        } else {
+            match opt.repeat {
+                RepeatBehavior::Count(count) => {
+                    let duration = if count > 0.0 {
+                        opt.duration.mul_f32(count)
+                    } else {
+                        DURATION_ZERO
+                    };
+                    Some(duration)
+                }
+                RepeatBehavior::Forever => None,
+            }
+        };
+        Self { opt, duration }
     }
 }
 
@@ -26,28 +45,29 @@ impl<T: Animatable> BaseAnimation for Primitive<T> {
 
     #[inline(always)]
     fn duration(&self) -> Option<Duration> {
-        match self.opt.repeat {
-            RepeatBehavior::Count(count) => Some(self.opt.duration * count),
-            RepeatBehavior::Forever => None,
-        }
+        self.duration
     }
 
-    fn animate(&self, elapsed: Duration) -> Self::Item {
-        // calc normalized time
-        let finished = self.duration().map(|d| elapsed >= d).unwrap_or_default();
-        let time = if finished {
-            if self.opt.auto_reverse {
-                0.0
-            } else {
-                1.0
+    fn animate(&self, mut elapsed: Duration) -> Self::Item {
+        if let Some(duration) = self.duration() {
+            // opt.duration<=0 || repeat count <=0
+            if duration == DURATION_ZERO {
+                return self.opt.from.clone();
             }
-        } else {
-            let time = elapsed.as_secs_f64() / self.opt.duration.as_secs_f64();
-            time - time.floor()
-        };
+            //apply repeat limit
+            if elapsed > duration {
+                elapsed = duration;
+            }
+        }
 
-        let time = self.opt.easing.ease(time);
-
+        // calc normalized time
+        let time = elapsed.as_secs_f64() / self.opt.duration.as_secs_f64();
+        let count = time.floor();
+        let mut time = time - count;
+        if count > 0.0 && time == 0.0 {
+            time = 1.0;
+        }
+        time = self.opt.easing.ease(time);
         if self.opt.auto_reverse {
             if time > 0.5 {
                 //reverse
