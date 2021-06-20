@@ -12,6 +12,7 @@ mod map;
 mod parallel;
 mod primitive;
 mod repeat;
+mod scale;
 mod skip;
 
 use crate::{easing, Options, RepeatBehavior, Timeline};
@@ -26,6 +27,8 @@ pub(crate) use primitive::Primitive;
 pub(crate) use repeat::Repeat;
 pub(crate) use skip::Skip;
 use std::time::Duration;
+
+use self::scale::Scale;
 
 /// build a linear animation(x=t), with which you can get normalized time between 0-1
 ///
@@ -120,6 +123,42 @@ pub trait Animation: BaseAnimation {
         Chain::new(self, other)
     }
 
+    /// speed up or slow down you animation
+    ///
+    /// scale | effect
+    /// ------|-------
+    /// =0.0 | your animation's duration becomes zero
+    /// <1.0 | speed up your animation
+    /// >1.0 | slow down your animation
+    /// <0.0 | panics
+    ///
+    /// see [`Animation::speed_up`]
+    #[inline(always)]
+    fn scale(self, scale: f64) -> Scale<Self>
+    where
+        Self: Sized,
+    {
+        Scale::new(self, scale)
+    }
+
+    /// speed up or slow down you animation
+    ///
+    /// =0.0 | panics
+    /// >1.0 | speed up your animation
+    /// <1.0 | slow down your animation
+    /// <=0.0 | panics
+    ///
+    /// see [`Animation::scale`]
+    #[inline(always)]
+    fn speed_up(self, ratio: f64) -> Scale<Self>
+    where
+        Self: Sized,
+    {
+        assert!(ratio >= 0.0);
+        let scale = 1.0 / ratio;
+        Scale::new(self, scale)
+    }
+
     /// repeat animations with specified strategies
     ///
     /// panics if count == 0
@@ -195,6 +234,17 @@ pub trait Animation: BaseAnimation {
         Self: Sized + 'static,
     {
         Boxed::new(self)
+    }
+
+    /// build [`Timeline`]
+    #[inline(always)]
+    fn to_timeline(self) -> Timeline<Self::Item>
+    where
+        Self: Sized + 'static,
+        Self::Item: 'static,
+    {
+        let timeline = Timeline::new(self);
+        timeline
     }
 
     /// build [`Timeline`] and start to play the animation
@@ -514,7 +564,7 @@ mod test {
             .duration(Duration::from_millis(1000))
             .auto_reverse(false)
             .build()
-            .times(2.0);
+            .times(1.5);
 
         let v = animation.animate(DURATION_ZERO);
         assert_eq!(v, 0.0);
@@ -529,6 +579,81 @@ mod test {
         assert_eq!(v, 0.5);
 
         let v = animation.animate(Duration::from_millis(2000));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(2100));
+        assert_eq!(v, 0.5);
+    }
+
+    #[test]
+    fn test_scale_up() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .build()
+            .scale(2.0);
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.25);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(2000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(2100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_scale_down() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(2000))
+            .auto_reverse(false)
+            .build()
+            .scale(0.5);
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1200));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(2100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_speed_up() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(2000))
+            .auto_reverse(false)
+            .build()
+            .speed_up(2.0);
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1200));
         assert_eq!(v, 1.0);
 
         let v = animation.animate(Duration::from_millis(2100));
