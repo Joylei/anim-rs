@@ -13,7 +13,7 @@ mod parallel;
 mod primitive;
 mod repeat;
 mod scale;
-mod skip;
+mod seek;
 
 use crate::{easing, Options, RepeatBehavior, Timeline};
 
@@ -25,7 +25,8 @@ pub(crate) use map::Map;
 pub(crate) use parallel::Parallel;
 pub(crate) use primitive::Primitive;
 pub(crate) use repeat::Repeat;
-pub(crate) use skip::Skip;
+pub(crate) use seek::Seek;
+pub use seek::SeekFrom;
 use std::time::Duration;
 
 use self::scale::Scale;
@@ -95,12 +96,43 @@ pub trait Animation: BaseAnimation {
     }
 
     /// always move forward for specified time when play current animation
+    ///
+    /// just a simple wrap on [`Animation::seek`]
     #[inline(always)]
-    fn skip(self, progress: Duration) -> Skip<Self>
+    fn skip(self, progress: Duration) -> Seek<Self>
     where
         Self: Sized,
     {
-        Skip::new(self, progress)
+        Seek::new(self, SeekFrom::FromBegin(progress))
+    }
+
+    /// always move forward for specified time when play current animation
+    ///
+    /// ## panic
+    /// - panics if percentage < -1.0 or percentage > 1.0
+    /// - panics if current animation runs indefinitely while seeking from end or by percentage
+    #[inline(always)]
+    fn seek(self, seek: SeekFrom) -> Seek<Self>
+    where
+        Self: Sized,
+    {
+        Seek::new(self, seek)
+    }
+
+    /// always move forward for specified time when play current animation
+    ///
+    /// just a simple wrap on [`Animation::seek`]
+    ///
+    /// ## panic
+    /// - panics if percentage < -1.0 or percentage > 1.0
+    /// - panics if current animation runs indefinitely
+    #[inline(always)]
+    fn seek_by(self, percentage: f32) -> Seek<Self>
+    where
+        Self: Sized,
+    {
+        assert!(percentage >= -1.0 && percentage <= 1.0);
+        Seek::new(self, SeekFrom::Percentage(percentage))
     }
 
     /// map from one type to another
@@ -143,7 +175,8 @@ pub trait Animation: BaseAnimation {
 
     /// speed up or slow down you animation
     ///
-    /// =0.0 | panics
+    /// ratio | effect
+    /// -----|--------
     /// >1.0 | speed up your animation
     /// <1.0 | slow down your animation
     /// <=0.0 | panics
@@ -160,6 +193,8 @@ pub trait Animation: BaseAnimation {
     }
 
     /// repeat animations with specified strategies
+    ///
+    /// panics if count<0
     #[inline(always)]
     fn repeat(self, repeat: RepeatBehavior) -> Repeat<Self>
     where
@@ -171,6 +206,9 @@ pub trait Animation: BaseAnimation {
     /// repeat your animation for specified times
     ///
     /// see [`Animation::repeat`]
+    ///
+    /// ## panic
+    /// panics if count<0
     #[inline(always)]
     fn times(self, count: f32) -> Repeat<Self>
     where

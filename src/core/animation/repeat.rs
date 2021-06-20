@@ -23,7 +23,10 @@ impl<T: Animation> Repeat<T> {
                 return Some(DURATION_ZERO);
             }
             match repeat {
-                RepeatBehavior::Count(count) => Some(duration.mul_f32(count)),
+                RepeatBehavior::Count(count) => {
+                    assert!(count >= 0.0);
+                    Some(duration.mul_f32(count))
+                }
                 RepeatBehavior::Forever => None,
             }
         });
