@@ -19,21 +19,20 @@ pub struct Primitive<T: Animatable> {
 }
 
 impl<T: Animatable> Primitive<T> {
-    #[inline(always)]
+    #[inline]
     pub(crate) fn new(opt: Options<T>) -> Self {
-        let duration = if opt.duration <= DURATION_ZERO {
-            Some(DURATION_ZERO)
-        } else {
-            match opt.repeat {
-                RepeatBehavior::Count(count) => {
-                    let duration = if count > 0.0 {
+        let duration = {
+            if opt.duration == DURATION_ZERO {
+                Some(DURATION_ZERO)
+            } else {
+                match opt.repeat {
+                    RepeatBehavior::Count(count) => Some(if count > 0.0 {
                         opt.duration.mul_f32(count)
                     } else {
                         DURATION_ZERO
-                    };
-                    Some(duration)
+                    }),
+                    RepeatBehavior::Forever => None,
                 }
-                RepeatBehavior::Forever => None,
             }
         };
         Self { opt, duration }
@@ -45,12 +44,41 @@ impl<T: Animatable> BaseAnimation for Primitive<T> {
 
     #[inline(always)]
     fn duration(&self) -> Option<Duration> {
-        self.duration
+        if let Some(mut duration) = self.duration {
+            //apply delay
+            if let Some(delay) = self.opt.delay {
+                duration += delay;
+            }
+            //apply skip
+            if let Some(skip) = self.opt.skip {
+                if duration > skip {
+                    duration -= skip
+                } else {
+                    duration = DURATION_ZERO;
+                }
+            }
+            Some(duration)
+        } else {
+            None
+        }
     }
 
     fn animate(&self, mut elapsed: Duration) -> Self::Item {
+        //apply skip
+        if let Some(skip) = self.opt.skip {
+            elapsed += skip;
+        }
+        //apply delay
+        if let Some(delay) = self.opt.delay {
+            if elapsed > delay {
+                elapsed -= delay;
+            } else {
+                elapsed = DURATION_ZERO;
+            }
+        }
+
         // TODO: optimize for T:Eq
-        if let Some(duration) = self.duration() {
+        if let Some(duration) = self.duration {
             // opt.duration<=0 || repeat count <=0
             if duration == DURATION_ZERO {
                 return self.opt.from.clone();

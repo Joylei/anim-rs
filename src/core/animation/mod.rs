@@ -412,6 +412,56 @@ mod test {
     }
 
     #[test]
+    fn test_primitive_skip() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .skip(Duration::from_millis(500))
+            .build();
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(250));
+        assert_eq!(v, 0.75);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_primitive_delay() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .delay(Duration::from_millis(500))
+            .build();
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(250));
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(1500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1700));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
     fn test_map() {
         let animation = Options::new(0.0, 1.0)
             .easing(easing::linear())

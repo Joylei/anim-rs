@@ -31,7 +31,8 @@ pub struct Options<T: Animatable> {
     pub(crate) from: T,
     pub(crate) to: T,
     pub(crate) auto_reverse: bool,
-    pub(crate) begin_time: std::option::Option<Duration>,
+    pub(crate) skip: Option<Duration>,
+    pub(crate) delay: Option<Duration>,
     pub(crate) duration: Duration,
     pub(crate) repeat: RepeatBehavior,
     pub(crate) easing: Box<dyn easing::Function>,
@@ -45,7 +46,8 @@ impl<T: Animatable> Options<T> {
             from,
             to,
             auto_reverse: false,
-            begin_time: None,
+            skip: None,
+            delay: None,
             duration: Duration::from_millis(1000),
             repeat: Default::default(),
             easing: Box::new(easing::cubic_ease()),
@@ -80,13 +82,29 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// animation begin time, same effect as [`crate::core::Animation::skip()`];
+    /// deprecated, use [`Options::skip()`] instead
+    #[deprecated()]
+    #[inline]
+    pub fn begin_time(self, begin_time: Duration) -> Self {
+        self.skip(begin_time)
+    }
+
+    /// play animation from the specified progress, same effect as [`crate::core::Animation::skip()`]
+    ///
+    /// see [`crate::core::Animation::skip()`]
+    #[inline]
+    pub fn skip(mut self, skip: Duration) -> Self {
+        self.skip = Some(skip);
+        self
+    }
+
+    /// play animation with delay, same effect as [`crate::core::Animation::delay()`];
     /// take effect only once when the animation loops more than once.
     ///
-    /// see [`Options::repeat()`] & [`crate::core::Animation::skip()`]
+    /// see [`crate::core::Animation::delay()`]
     #[inline]
-    pub fn begin_time(mut self, begin_time: Duration) -> Self {
-        self.begin_time = Some(begin_time);
+    pub fn delay(mut self, delay: Duration) -> Self {
+        self.delay = Some(delay);
         self
     }
 
@@ -129,16 +147,9 @@ impl<T: Animatable> Options<T> {
 
     /// set ease function
     #[inline]
-    pub fn easing(self, func: impl easing::Function + Clone + 'static) -> Options<T> {
-        Options {
-            from: self.from,
-            to: self.to,
-            auto_reverse: self.auto_reverse,
-            begin_time: self.begin_time,
-            duration: self.duration,
-            repeat: self.repeat,
-            easing: Box::new(func),
-        }
+    pub fn easing(mut self, func: impl easing::Function + Clone + 'static) -> Self {
+        self.easing = Box::new(func);
+        self
     }
 
     /// build [`Animation`]
@@ -164,7 +175,7 @@ impl<T: Animatable + fmt::Debug> fmt::Debug for Options<T> {
             .field("from", &self.from)
             .field("to", &self.to)
             .field("auto_reverse", &self.auto_reverse)
-            .field("begin_time", &self.begin_time)
+            .field("begin_time", &self.skip)
             .field("duration", &self.duration)
             .field("repeat", &self.repeat)
             .field("easing", &"[easing function]")
@@ -179,7 +190,8 @@ impl<T: Animatable> Clone for Options<T> {
             from: self.from.clone(),
             to: self.to.clone(),
             auto_reverse: self.auto_reverse,
-            begin_time: self.begin_time,
+            skip: self.skip,
+            delay: self.delay,
             duration: self.duration,
             repeat: self.repeat,
             easing: dyn_clone::clone_box(&*self.easing),
