@@ -11,12 +11,12 @@ use std::time::Duration;
 #[derive(Debug, Clone)]
 pub struct Scale<T: Animation> {
     src: T,
-    scale: f64,
+    scale: f32,
 }
 
 impl<T: Animation> Scale<T> {
     #[inline(always)]
-    pub(super) fn new(src: T, scale: f64) -> Self {
+    pub(super) fn new(src: T, scale: f32) -> Self {
         assert!(scale >= 0.0);
         Self { src, scale }
     }
@@ -30,7 +30,7 @@ impl<T: Animation> BaseAnimation for Scale<T> {
             if duration == DURATION_ZERO || self.scale == 0.0 {
                 return DURATION_ZERO;
             }
-            duration.div_f64(self.scale)
+            duration.div_f32(self.scale)
         })
     }
 
@@ -39,7 +39,7 @@ impl<T: Animation> BaseAnimation for Scale<T> {
         if self.scale == 0.0 {
             return self.src.animate(DURATION_ZERO);
         }
-        let elapsed = elapsed.div_f64(self.scale);
+        let elapsed = elapsed.div_f32(self.scale);
         self.src.animate(elapsed)
     }
 }

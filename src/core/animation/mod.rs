@@ -134,7 +134,7 @@ pub trait Animation: BaseAnimation {
     ///
     /// see [`Animation::speed_up`]
     #[inline(always)]
-    fn scale(self, scale: f64) -> Scale<Self>
+    fn scale(self, scale: f32) -> Scale<Self>
     where
         Self: Sized,
     {
@@ -150,7 +150,7 @@ pub trait Animation: BaseAnimation {
     ///
     /// see [`Animation::scale`]
     #[inline(always)]
-    fn speed_up(self, ratio: f64) -> Scale<Self>
+    fn speed_up(self, ratio: f32) -> Scale<Self>
     where
         Self: Sized,
     {
