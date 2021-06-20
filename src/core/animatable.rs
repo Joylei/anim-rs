@@ -8,7 +8,7 @@ use impl_trait_for_tuples::impl_for_tuples;
 
 ///  generates output values based on its timing progress
 ///
-/// see [`crate::core::timeline::Timeline`]
+/// see [`crate::Timeline`]
 pub trait Animatable: Sized + Clone {
     /// generates output values based on its timing progress
     fn animate(&self, to: &Self, time: f64) -> Self;
@@ -65,12 +65,11 @@ impl_primitive!(f64, float);
 
 impl Animatable for bool {
     fn animate(&self, to: &Self, time: f64) -> Self {
-        if self != to {
-            if time == 1.0 {
-                return *to;
-            }
+        if time < 1.0 {
+            *self
+        } else {
+            *to
         }
-        *self
     }
 }
 
