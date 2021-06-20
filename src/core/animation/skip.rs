@@ -18,7 +18,6 @@ pub struct Skip<T: Animation> {
 impl<T: Animation> Skip<T> {
     #[inline(always)]
     pub(super) fn new(src: T, progress: Duration) -> Self {
-        assert!(progress >= DURATION_ZERO);
         Self { src, progress }
     }
 }

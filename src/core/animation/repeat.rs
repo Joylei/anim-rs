@@ -19,7 +19,6 @@ impl<T: Animation> Repeat<T> {
     #[inline(always)]
     pub(super) fn new(src: T, repeat: RepeatBehavior) -> Self {
         let duration = src.duration().and_then(|duration| {
-            debug_assert!(duration >= DURATION_ZERO);
             if duration == DURATION_ZERO {
                 return Some(DURATION_ZERO);
             }

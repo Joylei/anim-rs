@@ -154,14 +154,12 @@ pub trait Animation: BaseAnimation {
     where
         Self: Sized,
     {
-        assert!(ratio >= 0.0);
+        assert!(ratio > 0.0);
         let scale = 1.0 / ratio;
         Scale::new(self, scale)
     }
 
     /// repeat animations with specified strategies
-    ///
-    /// panics if count == 0
     #[inline(always)]
     fn repeat(self, repeat: RepeatBehavior) -> Repeat<Self>
     where
@@ -173,8 +171,6 @@ pub trait Animation: BaseAnimation {
     /// repeat your animation for specified times
     ///
     /// see [`Animation::repeat`]
-    ///
-    /// panics if count == 0
     #[inline(always)]
     fn times(self, count: f32) -> Repeat<Self>
     where
