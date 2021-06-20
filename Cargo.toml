@@ -1,6 +1,6 @@
 [package]
 name = "anim"
-version = "0.1.0"
+version = "0.1.1"
 description = "A framework independent animation library for rust, works nicely with Iced and the others"
 readme = "README.md"
 license = "MIT"
@@ -9,7 +9,7 @@ homepage = "https://github.com/Joylei/anim-rs"
 repository = "https://github.com/Joylei/anim-rs.git"
 documentation = "https://docs.rs/crate/anim/"
 keywords = ["animation", "iced"]
-categories = ["visualization"]
+categories = ["visualization", "gui", "graphics"]
 authors = ["joylei <leingliu@gmail.com>"]
 
 [features]
@@ -18,7 +18,7 @@ local = ["parking_lot"]
 iced-backend = ["iced_native"]
 
 [dependencies]
-impl-trait-for-tuples = "0.2.1"
+impl-trait-for-tuples = "0.2"
 dyn-clone = "1"
 iced_native = { version="0.4", optional=true, default-features=false }
 parking_lot = { version="0.11", optional=true }

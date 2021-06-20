@@ -52,6 +52,7 @@ pub fn linear(duration: Duration) -> impl Animation<Item = f32> + Clone {
 }
 
 /// build a constant animation, which will output constant values
+#[allow(unused)]
 #[inline]
 pub fn constant<T: Clone>(value: T, duration: Duration) -> impl Animation<Item = T> + Clone {
     Options::new(true, true)
