@@ -12,9 +12,9 @@ use std::time::Duration;
 #[derive(Clone, Copy)]
 pub enum SeekFrom {
     /// from the beginning
-    FromBegin(Duration),
+    Begin(Duration),
     /// from the end
-    FromEnd(Duration),
+    End(Duration),
     /// by percentage, negative value means from the end
     Percentage(f32),
 }
@@ -29,8 +29,8 @@ pub struct Seek<T: Animation> {
 impl<T: Animation> Seek<T> {
     pub(super) fn new(src: T, seek: SeekFrom) -> Self {
         let progress = match seek {
-            SeekFrom::FromBegin(progress) => progress,
-            SeekFrom::FromEnd(progress) => {
+            SeekFrom::Begin(progress) => progress,
+            SeekFrom::End(progress) => {
                 if let Some(duration) = src.duration() {
                     if duration > progress {
                         duration - progress
@@ -42,6 +42,7 @@ impl<T: Animation> Seek<T> {
                 }
             }
             SeekFrom::Percentage(percent) => {
+                assert!(percent >= -1.0 && percent <= 1.0);
                 if let Some(duration) = src.duration() {
                     if percent < 0.0 {
                         duration.mul_f32(1.0 + percent)

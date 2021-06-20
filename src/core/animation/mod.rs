@@ -103,7 +103,7 @@ pub trait Animation: BaseAnimation {
     where
         Self: Sized,
     {
-        Seek::new(self, SeekFrom::FromBegin(progress))
+        Seek::new(self, SeekFrom::Begin(progress))
     }
 
     /// always move forward for specified time when play current animation
@@ -131,7 +131,6 @@ pub trait Animation: BaseAnimation {
     where
         Self: Sized,
     {
-        assert!(percentage >= -1.0 && percentage <= 1.0);
         Seek::new(self, SeekFrom::Percentage(percentage))
     }
 
@@ -525,6 +524,72 @@ mod test {
             .auto_reverse(false)
             .build()
             .skip(Duration::from_millis(500));
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(250));
+        assert_eq!(v, 0.75);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_seek_from_end() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .build()
+            .seek(SeekFrom::End(Duration::from_millis(500)));
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(250));
+        assert_eq!(v, 0.75);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_seek_by() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .build()
+            .seek(SeekFrom::Percentage(0.5));
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(250));
+        assert_eq!(v, 0.75);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_seek_by_negative() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(1000))
+            .auto_reverse(false)
+            .build()
+            .seek(SeekFrom::Percentage(-0.5));
 
         let v = animation.animate(DURATION_ZERO);
         assert_eq!(v, 0.5);
