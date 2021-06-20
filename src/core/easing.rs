@@ -26,7 +26,7 @@ pub trait FunctionClone: Function + Clone {}
 
 impl<F: Function + Clone> FunctionClone for F {}
 
-/// easing mode, default [`EasingMode::InOut`]
+/// easing mode, default [`EasingMode::In`]
 #[derive(Debug, Clone, Copy)]
 pub enum EasingMode {
     /// ease in

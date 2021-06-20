@@ -10,12 +10,12 @@ use crate::{
 };
 use std::{fmt, time::Duration};
 
-/// how an [`crate::core::Animation`] repeats its simple duration
+/// how an [`Animation`] repeats its simple duration
 #[derive(Debug, Clone, Copy)]
 pub enum RepeatBehavior {
-    /// specifies the number of times the simple duration of a an [`crate::core::Animation`] plays. default 1.0
+    /// specifies the number of times the simple duration of a an [`Animation`] plays. default 1.0
     Count(f32),
-    /// The [`crate::core::Animation`] repeats indefinitely
+    /// The [`Animation`] repeats indefinitely
     Forever,
 }
 
@@ -26,7 +26,7 @@ impl Default for RepeatBehavior {
     }
 }
 
-/// options to build an [`crate::core::Animation`]
+/// options to build an [`Animation`]
 pub struct Options<T: Animatable> {
     pub(crate) from: T,
     pub(crate) to: T,
@@ -89,19 +89,19 @@ impl<T: Animatable> Options<T> {
         self.skip(begin_time)
     }
 
-    /// play animation from the specified progress, same effect as [`crate::core::Animation::skip()`]
+    /// play animation from the specified progress, same effect as [`Animation::skip()`]
     ///
-    /// see [`crate::core::Animation::skip()`]
+    /// see [`Animation::skip()`]
     #[inline]
     pub fn skip(mut self, skip: Duration) -> Self {
         self.skip = Some(skip);
         self
     }
 
-    /// play animation with delay, same effect as [`crate::core::Animation::delay()`];
+    /// play animation with delay, same effect as [`Animation::delay()`];
     /// take effect only once when the animation loops more than once.
     ///
-    /// see [`crate::core::Animation::delay()`]
+    /// see [`Animation::delay()`]
     #[inline]
     pub fn delay(mut self, delay: Duration) -> Self {
         self.delay = Some(delay);
@@ -124,7 +124,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// your [`crate::core::Animation`] repeats indefinitely
+    /// your [`Animation`] repeats indefinitely
     ///
     /// see [`Options::repeat()`]
     #[inline]
@@ -133,7 +133,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// your [`crate::core::Animation`] repeats for specified times
+    /// your [`Animation`] repeats for specified times
     ///
     /// see [`Options::repeat()`]
     ///
@@ -160,7 +160,7 @@ impl<T: Animatable> Options<T> {
 }
 
 impl<T: Animatable + 'static> Options<T> {
-    /// build [`crate::core::Timeline`] and start animation
+    /// build [`Timeline`] and start animation
     #[inline]
     pub fn begin_animation(self) -> Timeline<T> {
         let mut timeline: Timeline<_> = self.into();
