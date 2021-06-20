@@ -47,6 +47,15 @@ pub fn linear(duration: Duration) -> impl Animation<Item = f32> + Clone {
         .build()
 }
 
+/// build a constant animation, which will output constant values
+#[inline]
+pub fn constant<T: Clone>(value: T, duration: Duration) -> impl Animation<Item = T> + Clone {
+    Options::new(true, true)
+        .duration(duration)
+        .build()
+        .map(move |_| value.clone())
+}
+
 /// A crate-private base trait,
 pub trait BaseAnimation {
     /// animated value
@@ -225,6 +234,15 @@ impl<T: Animation> IsFinished for T {
 mod test {
     use super::*;
     use crate::core::{easing, Options, DURATION_ZERO};
+
+    #[test]
+    fn test_constant() {
+        let animation = constant(1.0, Duration::from_millis(200));
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 1.0);
+        let v = animation.animate(Duration::from_secs(10));
+        assert_eq!(v, 1.0);
+    }
 
     #[test]
     fn test_primitive() {
