@@ -38,8 +38,16 @@ pub struct Options<T: Animatable> {
     pub(crate) easing: Box<dyn easing::Function>,
 }
 
-impl<T: Animatable> Options<T> {
+impl<T: Animatable + Default> Options<T> {
     /// create new [`Options`]
+    #[inline]
+    pub fn new_with_to(to: T) -> Self {
+        Self::new(Default::default(), to)
+    }
+}
+
+impl<T: Animatable> Options<T> {
+    /// create new [`Options`] from range
     #[inline]
     pub fn new(from: T, to: T) -> Self {
         Options {
