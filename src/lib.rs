@@ -76,7 +76,7 @@ loop {
 }
 ```
 
-For complex scenarios, please look at [examples](https://github.com/Joylei/anim-rs/examples/) to gain some ideas.
+For complex scenarios, please look at [examples](https://github.com/Joylei/anim-rs/tree/master/examples/) to gain some ideas.
 
 
 */
