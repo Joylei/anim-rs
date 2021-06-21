@@ -13,11 +13,11 @@ This is a framework independent animation library for rust, works nicely with [I
 
 <center>
 
-![Color&Opacity Animation Example](./images/color-example.gif)
+![Color&Opacity Animation Example](https://cdn.jsdelivr.net/gh/Joylei/anim-rs@0.1.0/images/color-example.gif)
 
-![Size Animation Example](./images/size-example.gif)
+![Size Animation Example](https://cdn.jsdelivr.net/gh/Joylei/anim-rs@0.1.0/images/size-example.gif)
 
-![Raindrop Splash Animation](./images/animated-splash.gif)
+![Raindrop Splash Animation](https://cdn.jsdelivr.net/gh/Joylei/anim-rs@0.1.0/images/animated-splash.gif)
 
 </center>
 
@@ -76,7 +76,7 @@ loop {
 }
 ```
 
-For complex scenarios, please look at [examples](./examples/) to gain some ideas.
+For complex scenarios, please look at [examples](https://github.com/Joylei/anim-rs/examples/) to gain some ideas.
 
 
 */
