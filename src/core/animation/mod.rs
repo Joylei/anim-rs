@@ -15,12 +15,15 @@ mod primitive;
 mod repeat;
 mod scale;
 mod seek;
+mod step;
 
 use crate::{easing, Animatable, Options, RepeatBehavior, Timeline};
 
 pub use self::key_frame::{KeyFrame, KeyTime};
-use self::scale::Scale;
 pub use self::seek::SeekFrom;
+pub use self::step::Cursor;
+pub use self::step::StepAnimation;
+use self::{scale::Scale, step::Infinite};
 pub(crate) use boxed::Boxed;
 pub(crate) use cache::Cache;
 pub(crate) use chain::Chain;
@@ -71,6 +74,51 @@ pub fn key_frames<T: Animatable>(
     frames: impl Into<Vec<KeyFrame<T>>>,
 ) -> impl Animation<Item = T> + Clone {
     KeyFrameAnimation::builder(frames.into()).build()
+}
+
+/// infinite or finite steps
+///
+/// see [`Cursor`]
+#[inline]
+pub fn steps<T: Cursor>(src: T, interval: Duration) -> StepAnimation<T> {
+    StepAnimation::new(src).interval(interval)
+}
+
+/// infinite steps
+///
+/// ## Example
+/// ```rust
+/// use std::time::Duration;
+/// use anim::{Animation, builder::steps_infinite};
+///
+/// #[derive(Debug)]
+/// enum Action {
+///     Stand,
+///     Step1,
+///     Step2,
+///     Run,   
+/// }
+///
+/// let steps = steps_infinite(|i| {
+///     if i == 0 {
+///         return Action::Stand;
+///      }
+///      match (i-1) % 3 {
+///           0 => Action::Step1,
+///           1 => Action::Step2,
+///            _ => Action::Run,
+///       }
+/// },Duration::from_millis(40));
+/// let timeline = steps.begin_animation();
+/// //...
+/// ```
+#[inline]
+pub fn steps_infinite<F: Fn(usize) -> T, T>(
+    f: F,
+    interval: Duration,
+) -> StepAnimation<Infinite<F, T>> {
+    let src = Infinite::new(f);
+    StepAnimation::new(src).interval(interval)
 }
 
 /// A crate-private base trait,
@@ -234,6 +282,17 @@ pub trait Animation: BaseAnimation {
     /// see [`Animation::repeat`]
     #[inline]
     fn forever(self) -> Repeat<Self>
+    where
+        Self: Sized,
+    {
+        self.cycle()
+    }
+
+    // repeat your animation indefinitely
+    ///
+    /// see [`Animation::repeat`]
+    #[inline]
+    fn cycle(self) -> Repeat<Self>
     where
         Self: Sized,
     {
@@ -846,5 +905,44 @@ mod test {
 
         let v = key_frames.animate(Duration::from_millis(2100));
         assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_steps_infinite() {
+        let steps = steps_infinite(
+            |i| {
+                if i == 0 {
+                    return Action::Stand;
+                }
+                match (i - 1) % 3 {
+                    0 => Action::Step1,
+                    1 => Action::Step2,
+                    _ => Action::Run,
+                }
+            },
+            Duration::from_millis(100),
+        );
+        let v = steps.animate(DURATION_ZERO);
+        assert_eq!(v, Action::Stand);
+
+        let v = steps.animate(Duration::from_millis(100));
+        assert_eq!(v, Action::Step1);
+
+        let v = steps.animate(Duration::from_millis(199));
+        assert_eq!(v, Action::Step1);
+
+        let v = steps.animate(Duration::from_millis(900));
+        assert_eq!(v, Action::Run);
+
+        let v = steps.animate(Duration::from_millis(999));
+        assert_eq!(v, Action::Run);
+    }
+
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+    enum Action {
+        Stand,
+        Step1,
+        Step2,
+        Run,
     }
 }

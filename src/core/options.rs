@@ -144,9 +144,15 @@ impl<T: Animatable> Options<T> {
 
     /// your [`Animation`] repeats indefinitely
     ///
-    /// see [`Options::repeat()`]
+    /// alias of [`Options::cycle()`], see [`Options::repeat()`]
     #[inline]
-    pub fn forever(mut self) -> Self {
+    pub fn forever(self) -> Self {
+        self.cycle()
+    }
+
+    /// your [`Animation`] repeats indefinitely
+    ///
+    pub fn cycle(mut self) -> Self {
         self.repeat = RepeatBehavior::Forever;
         self
     }

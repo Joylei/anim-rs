@@ -20,7 +20,7 @@ use std::time::Duration;
 #[doc(inline)]
 pub use animatable::Animatable;
 #[doc(inline)]
-pub use animation::{Animation, KeyFrame, KeyTime, SeekFrom};
+pub use animation::{Animation, Cursor, KeyFrame, KeyTime, SeekFrom};
 #[doc(inline)]
 pub use easing::Function;
 #[doc(inline)]
@@ -41,5 +41,5 @@ pub const DEFAULT_ANIMATION_DURATION: Duration = Duration::from_secs(1);
 /// animation builders
 pub mod builder {
     #[doc(inline)]
-    pub use super::animation::{constant, key_frames, linear};
+    pub use super::animation::{constant, key_frames, linear, steps, steps_infinite};
 }
