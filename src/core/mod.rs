@@ -20,7 +20,7 @@ use std::time::Duration;
 #[doc(inline)]
 pub use animatable::Animatable;
 #[doc(inline)]
-pub use animation::{Animation, KeyFrame, KeyTime};
+pub use animation::{Animation, KeyFrame, KeyTime, SeekFrom};
 #[doc(inline)]
 pub use easing::Function;
 #[doc(inline)]

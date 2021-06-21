@@ -6,7 +6,7 @@
 
 use crate::{
     core::{animation::Primitive, easing, Animatable},
-    Animation, Timeline,
+    Animation, Timeline, DEFAULT_ANIMATION_DURATION,
 };
 use std::{fmt, time::Duration};
 
@@ -46,7 +46,7 @@ impl<T: Animatable + Default> Default for Options<T> {
             auto_reverse: false,
             skip: None,
             delay: None,
-            duration: Duration::from_secs(1),
+            duration: DEFAULT_ANIMATION_DURATION,
             repeat: Default::default(),
             easing: Box::new(easing::linear()),
         }
@@ -63,7 +63,7 @@ impl<T: Animatable> Options<T> {
             auto_reverse: false,
             skip: None,
             delay: None,
-            duration: Duration::from_secs(1),
+            duration: DEFAULT_ANIMATION_DURATION,
             repeat: Default::default(),
             easing: Box::new(easing::cubic_ease()),
         }
