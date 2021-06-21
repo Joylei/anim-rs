@@ -5,7 +5,7 @@
 // License: MIT
 
 // https://www.flutterclutter.dev/flutter/tutorials/beautiful-animated-splash-screen/2020/1108/
-use anim::{timeline::Status, Animation, Options, Timeline};
+use anim::{easing, timeline::Status, Animatable, Animation, Options, Timeline};
 use iced::{
     canvas::{self, Cursor, Geometry},
     Align, Application, Button, Canvas, Clipboard, Color, Column, Command, Container, Element,
@@ -24,6 +24,7 @@ enum Message {
     Tick,
     Click1,
     Click2,
+    Click3,
 }
 
 struct State {
@@ -31,6 +32,7 @@ struct State {
     painter: AnimationPainter,
     btn_run1: button::State,
     btn_run2: button::State,
+    btn_run3: button::State,
 }
 
 impl Application for State {
@@ -44,6 +46,7 @@ impl Application for State {
             painter: Default::default(),
             btn_run1: Default::default(),
             btn_run2: Default::default(),
+            btn_run3: Default::default(),
         };
         (app, Command::none())
     }
@@ -64,6 +67,9 @@ impl Application for State {
             }
             Message::Click2 => {
                 self.timeline = raindrop_animation2().begin_animation();
+            }
+            Message::Click3 => {
+                self.timeline = raindrop_animation3().begin_animation();
             }
         }
         Command::none()
@@ -101,6 +107,15 @@ impl Application for State {
                             .vertical_alignment(VerticalAlignment::Center),
                     )
                     .on_press(Message::Click2),
+                )
+                .push(
+                    Button::new(
+                        &mut self.btn_run3,
+                        Text::new("Run Again with method 3?")
+                            .horizontal_alignment(HorizontalAlignment::Center)
+                            .vertical_alignment(VerticalAlignment::Center),
+                    )
+                    .on_press(Message::Click3),
                 )
                 .into()
         } else {
@@ -172,6 +187,7 @@ impl canvas::Program<Message> for AnimationPainter {
     }
 }
 
+#[derive(Clone)]
 struct Raindrop {
     drop_size: f32,
     drop_pos: f32,
@@ -208,6 +224,7 @@ fn raindrop_animation() -> impl Animation<Item = Raindrop> {
         });
     let stage2 = Options::new(0.0, MAX_DROP_POS)
         .duration(duration.mul_f64(0.3))
+        .easing(easing::quad_ease())
         .build()
         .map(move |pos| Raindrop {
             drop_size: MAX_DROP_SIZE,
@@ -217,6 +234,7 @@ fn raindrop_animation() -> impl Animation<Item = Raindrop> {
         });
     let stage3 = Options::new(0.0, MAX_HOLE_SIZE)
         .duration(duration.mul_f64(0.5))
+        .easing(easing::quad_ease())
         .build()
         .map(move |size| Raindrop {
             drop_size: MAX_DROP_SIZE,
@@ -227,7 +245,7 @@ fn raindrop_animation() -> impl Animation<Item = Raindrop> {
     stage1.chain(stage2).chain(stage3)
 }
 
-//demo of delay and parallel, think it in another way
+//demo of delay and parallel
 fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
     let duration = Duration::from_millis(3000);
     let drop_size = Options::new(0.0, MAX_DROP_SIZE)
@@ -236,6 +254,7 @@ fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
 
     let drop_pos = Options::new(0.0, MAX_DROP_POS)
         .duration(duration.mul_f64(0.3))
+        .easing(easing::quad_ease())
         .build()
         .delay(duration.mul_f64(0.2));
 
@@ -244,6 +263,7 @@ fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
 
     let hole_size = Options::new(0.0, MAX_HOLE_SIZE)
         .duration(duration.mul_f64(0.5))
+        .easing(easing::quad_ease())
         .build()
         .delay(duration.mul_f64(0.5));
 
@@ -259,6 +279,50 @@ fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
                 hole_size,
             },
         )
+}
+
+/// demo key-frames, requires Raindrop animatable
+impl Animatable for Raindrop {
+    fn animate(&self, to: &Self, time: f64) -> Self {
+        let drop_size = self.drop_size.animate(&to.drop_size, time);
+        let drop_pos = self.drop_pos.animate(&to.drop_pos, time);
+        let drop_visible = self.drop_visible.animate(&to.drop_visible, time);
+        let hole_size = self.hole_size.animate(&to.hole_size, time);
+        Self {
+            drop_size,
+            drop_pos,
+            drop_visible,
+            hole_size,
+        }
+    }
+}
+fn raindrop_animation3() -> impl Animation<Item = Raindrop> {
+    use anim::KeyFrame;
+    let duration = Duration::from_millis(3000);
+    anim::builder::key_frames(vec![
+        KeyFrame::default(),
+        KeyFrame::new(Raindrop {
+            drop_size: MAX_DROP_SIZE,
+            ..Default::default()
+        })
+        .by_percentage(0.2),
+        KeyFrame::new(Raindrop {
+            drop_size: MAX_DROP_SIZE,
+            drop_pos: MAX_DROP_POS,
+            drop_visible: false,
+            ..Default::default()
+        })
+        .by_percentage(0.5)
+        .easing(easing::quad_ease()),
+        KeyFrame::new(Raindrop {
+            drop_size: MAX_DROP_SIZE,
+            drop_pos: MAX_DROP_POS,
+            drop_visible: false,
+            hole_size: MAX_HOLE_SIZE,
+        })
+        .by_duration(duration)
+        .easing(easing::quad_ease()),
+    ])
 }
 
 mod style {

@@ -67,8 +67,10 @@ pub fn constant<T: Clone>(value: T, duration: Duration) -> impl Animation<Item =
 /// - requires at least one frame
 /// - default duration is one second if not specified in any of the frames
 #[inline]
-pub fn key_frames<T: Animatable>(frames: impl Into<Vec<KeyFrame<T>>>) -> key_frame::Builder<T> {
-    KeyFrameAnimation::builder(frames.into())
+pub fn key_frames<T: Animatable>(
+    frames: impl Into<Vec<KeyFrame<T>>>,
+) -> impl Animation<Item = T> + Clone {
+    KeyFrameAnimation::builder(frames.into()).build()
 }
 
 /// A crate-private base trait,
@@ -817,6 +819,32 @@ mod test {
         assert_eq!(v, 1.0);
 
         let v = animation.animate(Duration::from_millis(2100));
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_key_frames() {
+        let key_frames = key_frames(vec![
+            KeyFrame::new(0.5).by_percentage(0.5),
+            KeyFrame::new(1.0).by_duration(Duration::from_millis(2000)),
+        ]);
+
+        let v = key_frames.animate(Duration::from_millis(0));
+        assert_eq!(v, 0.5);
+
+        let v = key_frames.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.5);
+
+        let v = key_frames.animate(Duration::from_millis(1000));
+        assert_eq!(v, 0.5);
+
+        let v = key_frames.animate(Duration::from_millis(1500));
+        assert_eq!(v, 0.75);
+
+        let v = key_frames.animate(Duration::from_millis(2000));
+        assert_eq!(v, 1.0);
+
+        let v = key_frames.animate(Duration::from_millis(2100));
         assert_eq!(v, 1.0);
     }
 }
