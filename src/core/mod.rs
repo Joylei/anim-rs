@@ -30,6 +30,7 @@ pub use timeline::Timeline;
 
 /// deprecated, please use [`builder::linear`] instead
 #[deprecated]
+#[doc(hidden)]
 pub use animation::linear;
 
 /// [`Duration`]::ZERO
