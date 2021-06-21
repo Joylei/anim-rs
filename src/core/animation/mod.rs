@@ -8,6 +8,7 @@ mod boxed;
 mod cache;
 mod chain;
 mod delay;
+mod key_frame;
 mod map;
 mod parallel;
 mod primitive;
@@ -15,28 +16,29 @@ mod repeat;
 mod scale;
 mod seek;
 
-use crate::{easing, Options, RepeatBehavior, Timeline};
+use crate::{easing, Animatable, Options, RepeatBehavior, Timeline};
 
+pub use self::key_frame::{KeyFrame, KeyTime};
+use self::scale::Scale;
+pub use self::seek::SeekFrom;
 pub(crate) use boxed::Boxed;
 pub(crate) use cache::Cache;
 pub(crate) use chain::Chain;
 pub(crate) use delay::Delay;
+pub(crate) use key_frame::KeyFrameAnimation;
 pub(crate) use map::Map;
 pub(crate) use parallel::Parallel;
 pub(crate) use primitive::Primitive;
 pub(crate) use repeat::Repeat;
 pub(crate) use seek::Seek;
-pub use seek::SeekFrom;
 use std::time::Duration;
-
-use self::scale::Scale;
 
 /// build a linear animation(x=t), with which you can get normalized time between 0-1
 ///
 /// ## Example
 /// ```rust
 /// use std::time::Duration;
-/// use anim::{linear, Animation};
+/// use anim::{Animation,builder::linear};
 ///
 /// let timeline = linear(Duration::from_millis(2000))
 ///      .map(|t| if t>0.5 { true } else { false })
@@ -52,13 +54,21 @@ pub fn linear(duration: Duration) -> impl Animation<Item = f32> + Clone {
 }
 
 /// build a constant animation, which will output constant values
-#[allow(unused)]
 #[inline]
 pub fn constant<T: Clone>(value: T, duration: Duration) -> impl Animation<Item = T> + Clone {
     Options::new(true, true)
         .duration(duration)
         .build()
         .map(move |_| value.clone())
+}
+
+/// build key frames animation
+///
+/// - requires at least one frame
+/// - default duration is one second if not specified in any of the frames
+#[inline]
+pub fn key_frames<T: Animatable>(frames: impl Into<Vec<KeyFrame<T>>>) -> key_frame::Builder<T> {
+    KeyFrameAnimation::builder(frames.into())
 }
 
 /// A crate-private base trait,

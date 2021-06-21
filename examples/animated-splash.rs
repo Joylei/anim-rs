@@ -240,7 +240,7 @@ fn raindrop_animation2() -> impl Animation<Item = Raindrop> {
         .delay(duration.mul_f64(0.2));
 
     //linear
-    let drop_visible = anim::linear(duration).map(|t| if t <= 0.5 { true } else { false });
+    let drop_visible = anim::builder::linear(duration).map(|t| if t <= 0.5 { true } else { false });
 
     let hole_size = Options::new(0.0, MAX_HOLE_SIZE)
         .duration(duration.mul_f64(0.5))

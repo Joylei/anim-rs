@@ -20,12 +20,26 @@ use std::time::Duration;
 #[doc(inline)]
 pub use animatable::Animatable;
 #[doc(inline)]
-pub use animation::{linear, Animation};
+pub use animation::Animation;
 #[doc(inline)]
 pub use easing::Function;
+#[doc(inline)]
 pub use options::*;
 #[doc(inline)]
 pub use timeline::Timeline;
 
+/// deprecated, please use [`builder::linear`] instead
+#[deprecated]
+pub use animation::linear;
+
 /// [`Duration`]::ZERO
 pub const DURATION_ZERO: Duration = Duration::from_secs(0);
+
+/// default animation time, 1 second
+pub const DEFAULT_ANIMATION_DURATION: Duration = Duration::from_secs(1);
+
+/// animation builders
+pub mod builder {
+    #[doc(inline)]
+    pub use super::animation::{constant, key_frames, linear};
+}
