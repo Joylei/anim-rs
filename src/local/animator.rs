@@ -130,7 +130,7 @@ impl<T> Drop for TimelineWrapper<T> {
     fn drop(&mut self) {
         let id = self.id;
         let scheduled = self.scheduled();
-        dbg!(Rc::strong_count(&self.inner));
+        //dbg!(Rc::strong_count(&self.inner));
         if scheduled && Rc::strong_count(&self.inner) == 2 {
             //eprintln!("drop TimelineWrapper");
             self.shared.cancel(id);

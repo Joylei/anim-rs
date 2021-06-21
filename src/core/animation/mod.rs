@@ -122,8 +122,8 @@ pub trait Animation: BaseAnimation {
     /// always move forward for specified time when play current animation
     ///
     /// ## panic
-    /// - panics if percentage < -1.0 or percentage > 1.0
-    /// - panics if current animation runs indefinitely while seeking from end or by percentage
+    /// - panics if percent < -1.0 or percent > 1.0
+    /// - panics if current animation lasts indefinitely while seeking from end or by percent
     #[inline(always)]
     fn seek(self, seek: SeekFrom) -> Seek<Self>
     where
@@ -137,14 +137,14 @@ pub trait Animation: BaseAnimation {
     /// just a simple wrap on [`Animation::seek`]
     ///
     /// ## panic
-    /// - panics if percentage < -1.0 or percentage > 1.0
-    /// - panics if current animation runs indefinitely
+    /// - panics if percent < -1.0 or percent > 1.0
+    /// - panics if current animation lasts indefinitely
     #[inline(always)]
-    fn seek_by(self, percentage: f32) -> Seek<Self>
+    fn seek_by(self, percent: f32) -> Seek<Self>
     where
         Self: Sized,
     {
-        Seek::new(self, SeekFrom::Percentage(percentage))
+        Seek::new(self, SeekFrom::Percent(percent))
     }
 
     /// map from one type to another
@@ -580,7 +580,7 @@ mod test {
             .duration(Duration::from_millis(1000))
             .auto_reverse(false)
             .build()
-            .seek(SeekFrom::Percentage(0.5));
+            .seek(SeekFrom::Percent(0.5));
 
         let v = animation.animate(DURATION_ZERO);
         assert_eq!(v, 0.5);
@@ -602,7 +602,7 @@ mod test {
             .duration(Duration::from_millis(1000))
             .auto_reverse(false)
             .build()
-            .seek(SeekFrom::Percentage(-0.5));
+            .seek(SeekFrom::Percent(-0.5));
 
         let v = animation.animate(DURATION_ZERO);
         assert_eq!(v, 0.5);
@@ -825,7 +825,7 @@ mod test {
     #[test]
     fn test_key_frames() {
         let key_frames = key_frames(vec![
-            KeyFrame::new(0.5).by_percentage(0.5),
+            KeyFrame::new(0.5).by_percent(0.5),
             KeyFrame::new(1.0).by_duration(Duration::from_millis(2000)),
         ]);
 

@@ -305,14 +305,14 @@ fn raindrop_animation3() -> impl Animation<Item = Raindrop> {
             drop_size: MAX_DROP_SIZE,
             ..Default::default()
         })
-        .by_percentage(0.2),
+        .by_percent(0.2),
         KeyFrame::new(Raindrop {
             drop_size: MAX_DROP_SIZE,
             drop_pos: MAX_DROP_POS,
             drop_visible: false,
             ..Default::default()
         })
-        .by_percentage(0.5)
+        .by_percent(0.5)
         .easing(easing::quad_ease()),
         KeyFrame::new(Raindrop {
             drop_size: MAX_DROP_SIZE,

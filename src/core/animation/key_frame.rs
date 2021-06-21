@@ -4,9 +4,12 @@ use std::time::Duration;
 
 use super::BaseAnimation;
 
+/// key time
 #[derive(Debug, Clone, Copy)]
 pub enum KeyTime {
+    /// by duration
     Duration(Duration),
+    /// by percent
     Percent(f32),
 }
 
@@ -32,13 +35,17 @@ impl From<f32> for KeyTime {
     }
 }
 
+/// key-frame
 pub struct KeyFrame<T> {
+    /// value of key-frame
     pub value: T,
+    /// key-time of key-frame
     pub key_time: KeyTime,
     easing: Box<dyn easing::Function>,
 }
 
 impl<T> KeyFrame<T> {
+    /// create key-frame
     #[inline]
     pub fn new(value: T) -> Self {
         Self {
@@ -48,6 +55,7 @@ impl<T> KeyFrame<T> {
         }
     }
 
+    /// create key-frame
     #[inline]
     pub fn new_with_key_time(value: T, key_time: KeyTime) -> Self {
         Self {
@@ -57,31 +65,37 @@ impl<T> KeyFrame<T> {
         }
     }
 
+    /// set value
     #[inline]
     pub fn value(mut self, value: T) -> Self {
         self.value = value;
         self
     }
 
+    /// set key time
     #[inline]
     pub fn key_time(mut self, key_time: KeyTime) -> Self {
         self.key_time = key_time;
         self
     }
 
+    /// set key time
+    ///
     /// panics if percent<0 or percent>1
     #[inline]
-    pub fn by_percentage(mut self, percent: f32) -> Self {
+    pub fn by_percent(mut self, percent: f32) -> Self {
         self.key_time = percent.into();
         self
     }
 
+    /// set key time
     #[inline]
     pub fn by_duration(mut self, duration: Duration) -> Self {
         self.key_time = duration.into();
         self
     }
 
+    /// set easing function
     #[inline]
     pub fn easing(mut self, func: impl easing::Function + Clone + 'static) -> Self {
         self.easing = Box::new(func);
@@ -237,7 +251,7 @@ impl<T: Animatable> Builder<T> {
             .or_else(|| Some(DEFAULT_ANIMATION_DURATION))
             .unwrap();
 
-        dbg!(max_duration);
+        //dbg!(max_duration);
 
         //sort key frames
         let mut key_frames: Vec<_> = self

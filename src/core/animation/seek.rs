@@ -15,8 +15,8 @@ pub enum SeekFrom {
     Begin(Duration),
     /// from the end
     End(Duration),
-    /// by percentage, negative value means from the end
-    Percentage(f32),
+    /// by percentage, 0.0-1.0; negative value means from the end
+    Percent(f32),
 }
 
 /// always bypass specified time
@@ -38,10 +38,10 @@ impl<T: Animation> Seek<T> {
                         DURATION_ZERO
                     }
                 } else {
-                    panic!("cannot seek from end for indefinite animation");
+                    panic!("cannot seek from end for infinite animation");
                 }
             }
-            SeekFrom::Percentage(percent) => {
+            SeekFrom::Percent(percent) => {
                 assert!(percent >= -1.0 && percent <= 1.0);
                 if let Some(duration) = src.duration() {
                     if percent < 0.0 {
@@ -50,7 +50,7 @@ impl<T: Animation> Seek<T> {
                         duration.mul_f32(percent)
                     }
                 } else {
-                    panic!("cannot seek by percentage for indefinite animation");
+                    panic!("cannot seek by percent for infinite animation");
                 }
             }
         };
