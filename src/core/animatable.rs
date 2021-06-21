@@ -22,13 +22,22 @@ macro_rules! impl_primitive {
         impl Animatable for $t {
             #[inline]
             fn animate(&self, to: &Self, time: f64) -> Self {
+                if time == 0.0 {
+                    return *self;
+                }
+                if time == 1.0 {
+                    return *to;
+                }
                 if self == to {
                     return *self;
                 }
                 crate::utils::check_time(time);
-                // from + (from-to) * time
                 let v = (*self as f64) * (1.0 - time) + (*to as f64) * time;
-                v.round() as Self
+                if *to >= *self {
+                    (v + 0.5) as Self
+                } else {
+                    (v - 0.5) as Self
+                }
             }
         }
     };
@@ -36,11 +45,17 @@ macro_rules! impl_primitive {
         impl Animatable for $t {
             #[inline]
             fn animate(&self, to: &Self, time: f64) -> Self {
+                if time == 0.0 {
+                    return *self;
+                }
+                if time == 1.0 {
+                    return *to;
+                }
                 if self == to {
                     return *self;
                 }
                 crate::utils::check_time(time);
-                // from + (from-to) * time
+                // from + (to-from) * time
                 let v = (*self as f64) * (1.0 - time) + (*to as f64) * time;
                 v as Self
             }
@@ -81,7 +96,7 @@ impl Animatable for char {
 
         let from_idx = *self as u32;
         let to_idx = *to as u32;
-        let idx = from_idx.animate(&to_idx, time) as u32;
+        let idx = from_idx.animate(&to_idx, time);
         let n = if from_idx > to_idx {
             from_idx - idx
         } else {
