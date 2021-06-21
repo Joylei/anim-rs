@@ -38,11 +38,18 @@ pub struct Options<T: Animatable> {
     pub(crate) easing: Box<dyn easing::Function>,
 }
 
-impl<T: Animatable + Default> Options<T> {
-    /// create new [`Options`]
-    #[inline]
-    pub fn new_with_to(to: T) -> Self {
-        Self::new(Default::default(), to)
+impl<T: Animatable + Default> Default for Options<T> {
+    fn default() -> Self {
+        Self {
+            from: Default::default(),
+            to: Default::default(),
+            auto_reverse: false,
+            skip: None,
+            delay: None,
+            duration: Duration::from_secs(1),
+            repeat: Default::default(),
+            easing: Box::new(easing::linear()),
+        }
     }
 }
 
@@ -56,7 +63,7 @@ impl<T: Animatable> Options<T> {
             auto_reverse: false,
             skip: None,
             delay: None,
-            duration: Duration::from_millis(1000),
+            duration: Duration::from_secs(1),
             repeat: Default::default(),
             easing: Box::new(easing::cubic_ease()),
         }
@@ -116,7 +123,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// animation simple duration, this animation will last for how long if it plays once. default 1000ms.
+    /// animation simple duration, this animation will last for how long if it plays once. default 1 second.
     ///
     /// If [`Options::repeat()`] is specified, the animation might play more than once.
     #[inline]
@@ -128,6 +135,9 @@ impl<T: Animatable> Options<T> {
     /// repeat behavior
     #[inline]
     pub fn repeat(mut self, behavior: RepeatBehavior) -> Self {
+        if let RepeatBehavior::Count(count) = behavior {
+            assert!(count >= 0.0);
+        }
         self.repeat = behavior;
         self
     }
@@ -153,7 +163,7 @@ impl<T: Animatable> Options<T> {
         self
     }
 
-    /// set ease function
+    /// set ease function, default [`easing::linear`]
     #[inline]
     pub fn easing(mut self, func: impl easing::Function + Clone + 'static) -> Self {
         self.easing = Box::new(func);
@@ -186,7 +196,7 @@ impl<T: Animatable + fmt::Debug> fmt::Debug for Options<T> {
             .field("begin_time", &self.skip)
             .field("duration", &self.duration)
             .field("repeat", &self.repeat)
-            .field("easing", &"[easing function]")
+            .field("easing", &"???")
             .finish()
     }
 }
