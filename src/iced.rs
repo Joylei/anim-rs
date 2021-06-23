@@ -60,3 +60,5 @@ impl<T: Animatable> Animatable for Vector<T> {
         Vector { x, y }
     }
 }
+
+pub mod transition;

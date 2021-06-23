@@ -41,6 +41,7 @@ version = "0.1.2"
 dependencies = [
  "dyn-clone",
  "iced",
+ "iced_graphics",
  "iced_native",
  "impl-trait-for-tuples",
  "parking_lot",

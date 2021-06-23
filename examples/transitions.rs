@@ -5,12 +5,12 @@
 // License: MIT
 
 use anim::{
-    easing,
-    timeline::{self, Status},
-    Animation, Options, Timeline,
+    easing::{self, EasingMode},
+    timeline,
+    transition::{fly, Transition},
 };
 use iced::{
-    button, Application, Button, Clipboard, Command, Container, HorizontalAlignment, Length, Size,
+    button, Application, Button, Clipboard, Command, Container, HorizontalAlignment, Length,
     Subscription, Text, VerticalAlignment,
 };
 use std::time::Duration;
@@ -28,7 +28,7 @@ enum Message {
 
 struct State {
     btn_test: button::State,
-    timeline: Timeline<(Length, Length)>,
+    transition: fly::Fly,
 }
 
 impl Application for State {
@@ -37,21 +37,16 @@ impl Application for State {
     type Message = self::Message;
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
+        let transition = fly::Parameters::default()
+            .offset(0.0, 300.0)
+            .delay(Duration::from_millis(300))
+            .duration(Duration::from_secs_f32(2.0))
+            .easing(easing::quart_ease().mode(EasingMode::In))
+            .fly_in();
+
         let app = Self {
             btn_test: Default::default(),
-            timeline: Options::new(Size::new(130.0, 30.0), Size::new(500.0, 200.0))
-                .duration(Duration::from_secs(2))
-                .auto_reverse(true)
-                .easing(easing::bounce_ease())
-                .times(3.0)
-                .build()
-                .map(|size| {
-                    (
-                        Length::Units(size.width as u16),
-                        Length::Units(size.height as u16),
-                    )
-                })
-                .into(),
+            transition,
         };
         (app, Command::none())
     }
@@ -63,14 +58,14 @@ impl Application for State {
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
         match message {
             Message::Tick => {
-                let status = self.timeline.status();
+                let status = self.transition.status();
                 match status {
                     timeline::Status::Idle => {
-                        self.timeline.begin();
+                        self.transition.begin();
                     }
                     _ => {}
                 }
-                self.timeline.update();
+                self.transition.update();
             }
             _ => {}
         }
@@ -78,26 +73,18 @@ impl Application for State {
     }
 
     fn view(&mut self) -> iced::Element<'_, Self::Message> {
-        let size = self.timeline.value();
-        let status = self.timeline.status();
         let button = Button::new(
             &mut self.btn_test,
-            Text::new(if status == Status::Completed {
-                "stopped"
-            } else {
-                "size changes"
-            })
-            .horizontal_alignment(HorizontalAlignment::Center)
-            .vertical_alignment(VerticalAlignment::Center)
-            .width(Length::Fill)
-            .height(Length::Fill),
+            Text::new("Fly in transition")
+                .horizontal_alignment(HorizontalAlignment::Center)
+                .vertical_alignment(VerticalAlignment::Center)
+                .width(Length::Fill)
+                .height(Length::Fill),
         )
         .style(style::Button)
-        .width(size.0)
-        .height(size.1)
         .on_press(Message::Idle);
 
-        Container::new(button)
+        Container::new(self.transition.view(button))
             .align_x(iced::Align::Center)
             .align_y(iced::Align::Center)
             .width(Length::Fill)
@@ -106,7 +93,7 @@ impl Application for State {
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
-        let status = self.timeline.status();
+        let status = self.transition.status();
         if status.is_animating() {
             const FPS: f32 = 60.0;
             iced::time::every(Duration::from_secs_f32(1.0 / FPS)).map(|_tick| Message::Tick)

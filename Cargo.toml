@@ -15,12 +15,13 @@ authors = ["joylei <leingliu@gmail.com>"]
 [features]
 default = ["local", "iced-backend"]
 local = ["parking_lot"]
-iced-backend = ["iced_native"]
+iced-backend = ["iced_native", "iced_graphics"]
 
 [dependencies]
 impl-trait-for-tuples = "0.2"
 dyn-clone = "1"
 iced_native = { version="0.4", optional=true, default-features=false }
+iced_graphics = { version="0.2", optional=true, default-features=false }
 parking_lot = { version="0.11", optional=true }
 
 [dev-dependencies]
