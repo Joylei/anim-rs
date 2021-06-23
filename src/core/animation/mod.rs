@@ -16,6 +16,7 @@ mod repeat;
 mod scale;
 mod seek;
 mod step;
+mod take;
 
 use crate::{easing, Animatable, Options, RepeatBehavior, Timeline};
 
@@ -35,6 +36,7 @@ pub(crate) use primitive::Primitive;
 pub(crate) use repeat::Repeat;
 pub(crate) use seek::Seek;
 use std::time::Duration;
+pub(crate) use take::Take;
 
 /// build a linear animation(x=t), with which you can get normalized time between 0-1
 ///
@@ -213,6 +215,15 @@ pub trait Animation: BaseAnimation {
         Other: Animation<Item = Self::Item>,
     {
         Chain::new(self, other)
+    }
+
+    /// take specified duration
+    #[inline(always)]
+    fn take(self, duration: Duration) -> Take<Self>
+    where
+        Self: Sized,
+    {
+        Take::new(self, duration)
     }
 
     /// speed up or slow down you animation
@@ -936,6 +947,54 @@ mod test {
 
         let v = steps.animate(Duration::from_millis(999));
         assert_eq!(v, Action::Run);
+    }
+
+    #[test]
+    fn test_take_in_range() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(2000))
+            .auto_reverse(false)
+            .build()
+            .take(Duration::from_millis(1000));
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.0);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.25);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(1500));
+        assert_eq!(v, 0.5);
+    }
+
+    #[test]
+    fn test_take_out_range() {
+        let animation = Options::new(0.0, 1.0)
+            .easing(easing::linear())
+            .duration(Duration::from_millis(2000))
+            .auto_reverse(false)
+            .build()
+            .skip(Duration::from_millis(1000))
+            .take(Duration::from_millis(2000));
+
+        let v = animation.animate(DURATION_ZERO);
+        assert_eq!(v, 0.5);
+
+        let v = animation.animate(Duration::from_millis(500));
+        assert_eq!(v, 0.75);
+
+        let v = animation.animate(Duration::from_millis(1000));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(1500));
+        assert_eq!(v, 1.0);
+
+        let v = animation.animate(Duration::from_millis(2111));
+        assert_eq!(v, 1.0);
     }
 
     #[derive(Debug, PartialEq, Eq, Clone, Copy)]
