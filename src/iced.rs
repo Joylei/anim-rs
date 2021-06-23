@@ -61,4 +61,5 @@ impl<T: Animatable> Animatable for Vector<T> {
     }
 }
 
+/// transitions for iced
 pub mod transition;

@@ -1,9 +1,6 @@
-use iced_graphics::{Backend, Defaults, Primitive, Renderer};
-use iced_native::{mouse::Interaction, Color, Element, Length, Point, Rectangle, Vector, Widget};
-
 use super::{Transition, DEFAULT_TRANSITION_DURATION};
 use crate::{easing, timeline::Status, Animation, Options, Timeline};
-use std::{fmt, marker::PhantomData, time::Duration};
+use std::time::Duration;
 
 /// fade transition parameters
 ///
@@ -73,7 +70,33 @@ impl Default for Parameters {
     }
 }
 
-/// transition controller
+/// fade transition controller
+///
+/// ## Example
+/// - fade in
+/// ```rust
+/// use std::time::Duration;
+/// use anim::{Timeline, easing, transition::fade};
+///
+/// let transition = fade::Parameters::default()
+///     .opacity(1.0)
+///     .delay(Duration::from_millis(200))
+///     .duration(Duration::from_secs(2))
+///     .easing(easing::quad_ease())
+///     .fade_in();
+/// ```
+/// - fade out
+/// ```rust
+/// use std::time::Duration;
+/// use anim::{Timeline, easing, transition::fade};
+///
+/// let transition = fade::Parameters::default()
+///     .opacity(1.0)
+///     .delay(Duration::from_millis(200))
+///     .duration(Duration::from_secs(2))
+///     .easing(easing::quad_ease())
+///     .fade_out();
+/// ```
 #[derive(Debug)]
 pub struct Fade {
     timeline: Timeline<(f32, bool)>,

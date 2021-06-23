@@ -1,16 +1,17 @@
 use super::{Transition, DEFAULT_TRANSITION_DURATION};
 use crate::{easing, timeline::Status, Animation, Options, Timeline};
 use iced_graphics::{Backend, Defaults, Primitive, Renderer};
-use iced_native::{mouse::Interaction, Element, Length, Point, Rectangle, Space, Vector, Widget};
+use iced_native::{
+    mouse::Interaction, Element, Length, Point, Rectangle, Size, Space, Vector, Widget,
+};
 use std::time::Duration;
 
-/// fly transition parameters
+/// Slide transition parameters
 ///
-/// see [`Fly`]
+/// see [`Slide`]
 #[derive(Debug)]
 pub struct Parameters {
-    opt: Options<Vector>,
-    offset: Vector,
+    opt: Options<f32>,
 }
 
 impl Parameters {
@@ -26,53 +27,37 @@ impl Parameters {
         self
     }
 
-    /// transition from/to offset x
-    pub fn offset_x(mut self, x: f32) -> Self {
-        self.offset = Vector { x, ..self.offset };
-        self
-    }
-
-    /// transition from/to offset y
-    pub fn offset_y(mut self, y: f32) -> Self {
-        self.offset = Vector { y, ..self.offset };
-        self
-    }
-
-    /// transition from/to offset
-    pub fn offset(mut self, x: f32, y: f32) -> Self {
-        self.offset = Vector { x, y };
-        self
-    }
-
     /// animation easing function
     pub fn easing(mut self, func: impl easing::Function + Clone + 'static) -> Self {
         self.opt = self.opt.easing(func);
         self
     }
 
-    /// fly in transition
-    pub fn fly_in(self) -> Fly {
-        let Parameters { opt, offset } = self;
+    /// slide in transition
+    pub fn slide_in(self) -> Slide {
+        let Parameters { opt } = self;
         let delay = opt.delay.unwrap_or_default();
         let animation = opt
-            .from(offset)
+            .from(0.0)
+            .to(1.0)
             .build()
             .zip(Options::new(false, true).duration(delay).build());
-        Fly {
+        Slide {
             timeline: animation.to_timeline(),
         }
     }
 
-    /// fly out transition
-    pub fn fly_out(self) -> Fly {
-        let Parameters { opt, offset } = self;
+    /// slide out transition
+    pub fn slide_out(self) -> Slide {
+        let Parameters { opt } = self;
         let delay = opt.delay.unwrap_or_default();
         let duration = opt.duration;
         let animation = opt
-            .to(offset)
+            .from(1.0)
+            .to(0.0)
             .build()
             .zip(Options::new(true, false).duration(delay + duration).build());
-        Fly {
+        Slide {
             timeline: animation.to_timeline(),
         }
     }
@@ -81,47 +66,42 @@ impl Parameters {
 impl Default for Parameters {
     fn default() -> Self {
         let opt = Options::default().duration(DEFAULT_TRANSITION_DURATION);
-        Self {
-            opt,
-            offset: Default::default(),
-        }
+        Self { opt }
     }
 }
 
-/// fly transition controller
+/// slide transition controller
 ///
 /// ## Example
-/// - fly in
+/// - slide in
 /// ```rust
 /// use std::time::Duration;
-/// use anim::{Timeline, easing, transition::fly};
+/// use anim::{Timeline, easing, transition::slide};
 ///
-/// let transition = fly::Parameters::default()
-///     .offset(0.0, 300.0)
+/// let transition = slide::Parameters::default()
 ///     .delay(Duration::from_millis(200))
 ///     .duration(Duration::from_secs(2))
 ///     .easing(easing::quad_ease())
-///     .fly_in();
+///     .slide_in();
 /// ```
-/// - fly out
+/// - slide out
 /// ```rust
 /// use std::time::Duration;
-/// use anim::{Timeline, easing, transition::fly};
+/// use anim::{Timeline, easing, transition::slide};
 ///
-/// let transition = fly::Parameters::default()
-///     .offset(0.0, 300.0)
+/// let transition = slide::Parameters::default()
 ///     .delay(Duration::from_millis(200))
 ///     .duration(Duration::from_secs(2))
 ///     .easing(easing::quad_ease())
-///     .fly_out();
+///     .slide_out();
 /// ```
 #[derive(Debug)]
-pub struct Fly {
-    timeline: Timeline<(Vector, bool)>,
+pub struct Slide {
+    timeline: Timeline<(f32, bool)>,
 }
 
-impl Fly {
-    fn get_value(&self) -> (Vector, bool) {
+impl Slide {
+    fn get_value(&self) -> (f32, bool) {
         let status = self.timeline.status();
         let (offset, visible) = self.timeline.value();
         if status.is_animating() {
@@ -131,8 +111,8 @@ impl Fly {
         }
     }
 
-    /// current offset
-    pub fn current(&self) -> Vector {
+    /// current height ratio
+    pub fn current(&self) -> f32 {
         let status = self.timeline.status();
         let (offset, _) = self.timeline.value();
         if status.is_animating() {
@@ -150,16 +130,17 @@ impl Fly {
         Message: 'a,
     {
         let (offset, visible) = self.get_value();
+        dbg!(visible);
         if visible {
             let content = content.into();
-            FlyElement::new(offset, content).into()
+            SlideElement::new(offset, content).into()
         } else {
             Space::new(Length::Units(0), Length::Units(0)).into()
         }
     }
 }
 
-impl Transition for Fly {
+impl Transition for Slide {
     fn begin(&mut self) {
         self.timeline.begin();
     }
@@ -182,25 +163,25 @@ impl Transition for Fly {
     }
 }
 
-struct FlyElement<'a, Message, B: Backend> {
-    offset: Vector,
+struct SlideElement<'a, Message, B: Backend> {
+    height_ratio: f32,
     content: Element<'a, Message, Renderer<B>>,
 }
 
-impl<'a, Message, B: Backend> FlyElement<'a, Message, B> {
-    fn new<E>(offset: Vector, content: E) -> Self
+impl<'a, Message, B: Backend> SlideElement<'a, Message, B> {
+    fn new<E>(height_ratio: f32, content: E) -> Self
     where
         E: Into<Element<'a, Message, Renderer<B>>>,
         Message: 'a,
     {
         Self {
-            offset,
+            height_ratio,
             content: content.into(),
         }
     }
 }
 
-impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for FlyElement<'a, Message, B> {
+impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for SlideElement<'a, Message, B> {
     fn width(&self) -> Length {
         self.content.width()
     }
@@ -225,16 +206,20 @@ impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for FlyElement<'a, Me
         cursor_position: Point,
         viewport: &Rectangle,
     ) -> (Primitive, Interaction) {
-        if self.offset.x == 0.0 && self.offset.y == 0.0 {
+        if self.height_ratio >= 1.0 {
             self.content
                 .draw(renderer, defaults, layout, cursor_position, viewport)
         } else {
+            let bounds = layout.bounds();
+            let height = self.height_ratio * bounds.height;
+            let bounds = Rectangle::new(bounds.position(), Size::new(bounds.width, height));
             let (primitive, interaction) =
                 self.content
                     .draw(renderer, defaults, layout, cursor_position, viewport);
             (
-                Primitive::Translate {
-                    translation: self.offset,
+                Primitive::Clip {
+                    bounds: bounds,
+                    offset: Vector::new(0, 0),
                     content: primitive.into(),
                 },
                 interaction,
@@ -273,12 +258,12 @@ impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for FlyElement<'a, Me
     }
 }
 
-impl<'a, Message, B> From<FlyElement<'a, Message, B>> for Element<'a, Message, Renderer<B>>
+impl<'a, Message, B> From<SlideElement<'a, Message, B>> for Element<'a, Message, Renderer<B>>
 where
     B: Backend + 'a,
     Message: 'a,
 {
-    fn from(src: FlyElement<'a, Message, B>) -> Self {
+    fn from(src: SlideElement<'a, Message, B>) -> Self {
         Element::new(src)
     }
 }
