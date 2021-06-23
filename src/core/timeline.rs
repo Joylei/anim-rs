@@ -75,7 +75,7 @@ enum State {
 static ID_GEN: AtomicUsize = AtomicUsize::new(1);
 
 /// control your animation
-//#[derive(Debug)]
+#[derive(Debug)]
 pub struct Timeline<T> {
     id: usize,
     animation: Boxed<T>, // it's not easy to use if not boxed
