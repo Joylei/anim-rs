@@ -49,12 +49,15 @@ impl EasingMode {
         let time = crate::utils::check_time(time);
         match self {
             EasingMode::In => f(time),
-            EasingMode::Out => 1.0 - f(time),
+            EasingMode::Out => 1.0 - f(1.0 - time),
             EasingMode::InOut => {
                 if time < 0.5 {
-                    f(time)
+                    f(time * 2.0) / 2.0
                 } else {
-                    1.0 - f(time)
+                    //let t = time * 2.0 - 1.0;
+                    //let v = 1.0 - f(1.0 - t);
+                    //0.5 + v / 2.0
+                    1.0 - f(2.0 - time * 2.0) / 2.0
                 }
             }
         }
@@ -210,5 +213,76 @@ mod functions {
             mode: Default::default(),
             f,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_linear() {
+        let modes = [EasingMode::In, EasingMode::Out, EasingMode::InOut];
+        for mode in modes.iter() {
+            let f = linear().mode(*mode);
+            let v = f.ease(0.0);
+            assert_eq!(v, 0.0);
+
+            let v = f.ease(0.5);
+            assert_eq!(v, 0.5);
+
+            let v = f.ease(0.75);
+            assert_eq!(v, 0.75);
+
+            let v = f.ease(1.0);
+            assert_eq!(v, 1.0);
+        }
+    }
+
+    #[test]
+    fn test_quad_in() {
+        let f = quad_ease().mode(EasingMode::In);
+        let v = f.ease(0.0);
+        assert_eq!(v, 0.0);
+
+        let v = f.ease(0.5);
+        assert_eq!(v, 0.25);
+
+        let v = f.ease(0.75);
+        assert_eq!(v, 0.5625);
+
+        let v = f.ease(1.0);
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_quad_out() {
+        let f = quad_ease().mode(EasingMode::Out);
+        let v = f.ease(0.0);
+        assert_eq!(v, 0.0);
+
+        let v = f.ease(0.5);
+        assert_eq!(v, 0.75);
+
+        let v = f.ease(0.75);
+        assert_eq!(v, 0.9375);
+
+        let v = f.ease(1.0);
+        assert_eq!(v, 1.0);
+    }
+
+    #[test]
+    fn test_quad_in_out() {
+        let f = quad_ease().mode(EasingMode::InOut);
+        let v = f.ease(0.0);
+        assert_eq!(v, 0.0);
+
+        let v = f.ease(0.5);
+        assert_eq!(v, 0.5);
+
+        let v = f.ease(0.75);
+        assert_eq!(v, 0.875);
+
+        let v = f.ease(1.0);
+        assert_eq!(v, 1.0);
     }
 }
