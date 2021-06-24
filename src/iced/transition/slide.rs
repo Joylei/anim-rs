@@ -4,7 +4,7 @@ use iced_graphics::{Backend, Defaults, Primitive, Renderer};
 use iced_native::{
     mouse::Interaction, Element, Length, Point, Rectangle, Size, Space, Vector, Widget,
 };
-use std::time::Duration;
+use std::{hash::Hash, time::Duration};
 
 /// Slide transition parameters
 ///
@@ -101,25 +101,10 @@ pub struct Slide {
 }
 
 impl Slide {
-    fn get_value(&self) -> (f32, bool) {
-        let status = self.timeline.status();
-        let (offset, visible) = self.timeline.value();
-        if status.is_animating() {
-            (offset, visible)
-        } else {
-            (Default::default(), visible)
-        }
-    }
-
     /// current height ratio
     pub fn current(&self) -> f32 {
-        let status = self.timeline.status();
-        let (offset, _) = self.timeline.value();
-        if status.is_animating() {
-            offset
-        } else {
-            Default::default()
-        }
+        let (ratio, _) = self.timeline.value();
+        ratio
     }
 
     /// build view
@@ -129,11 +114,11 @@ impl Slide {
         B: Backend + 'a,
         Message: 'a,
     {
-        let (offset, visible) = self.get_value();
-        dbg!(visible);
+        let (ratio, visible) = self.timeline.value();
+        //dbg!(ratio);
         if visible {
             let content = content.into();
-            SlideElement::new(offset, content).into()
+            SlideElement::new(ratio, content).into()
         } else {
             Space::new(Length::Units(0), Length::Units(0)).into()
         }
@@ -195,7 +180,19 @@ impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for SlideElement<'a, 
         renderer: &Renderer<B>,
         limits: &iced_native::layout::Limits,
     ) -> iced_native::layout::Node {
-        self.content.layout(renderer, limits)
+        let node = self.content.layout(renderer, limits);
+        if self.height_ratio >= 1.0 {
+            node
+        } else if self.height_ratio == 0.0 {
+            iced_native::layout::Node::default()
+        } else {
+            let bounds = node.bounds();
+            let clip_bounds = Rectangle::new(
+                bounds.position(),
+                Size::new(bounds.width, self.height_ratio * bounds.height),
+            );
+            iced_native::layout::Node::with_children(clip_bounds.size(), vec![node])
+        }
     }
 
     fn draw(
@@ -209,13 +206,18 @@ impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for SlideElement<'a, 
         if self.height_ratio >= 1.0 {
             self.content
                 .draw(renderer, defaults, layout, cursor_position, viewport)
+        } else if self.height_ratio == 0.0 {
+            (Primitive::None, Interaction::Idle)
         } else {
             let bounds = layout.bounds();
-            let height = self.height_ratio * bounds.height;
-            let bounds = Rectangle::new(bounds.position(), Size::new(bounds.width, height));
-            let (primitive, interaction) =
-                self.content
-                    .draw(renderer, defaults, layout, cursor_position, viewport);
+            let content_layout = layout.children().next().unwrap();
+            let (primitive, interaction) = self.content.draw(
+                renderer,
+                defaults,
+                content_layout,
+                cursor_position,
+                viewport,
+            );
             (
                 Primitive::Clip {
                     bounds: bounds,
@@ -236,25 +238,40 @@ impl<'a, Message, B: Backend> Widget<Message, Renderer<B>> for SlideElement<'a, 
         clipboard: &mut dyn iced_native::Clipboard,
         messages: &mut Vec<Message>,
     ) -> iced_native::event::Status {
-        self.content.on_event(
-            event,
-            layout,
-            cursor_position,
-            renderer,
-            clipboard,
-            messages,
-        )
+        let bounds = layout.bounds();
+        if bounds.contains(cursor_position) {
+            self.content.on_event(
+                event,
+                layout,
+                cursor_position,
+                renderer,
+                clipboard,
+                messages,
+            )
+        } else {
+            iced_native::event::Status::Ignored
+        }
     }
 
     fn hash_layout(&self, state: &mut iced_native::Hasher) {
-        self.content.hash_layout(state)
+        struct Marker;
+        std::any::TypeId::of::<Marker>().hash(state);
+        self.height_ratio.to_bits().hash(state);
+        self.content.hash_layout(state);
     }
 
     fn overlay(
         &mut self,
         layout: iced_native::Layout<'_>,
     ) -> Option<iced_native::overlay::Element<'_, Message, Renderer<B>>> {
-        self.content.overlay(layout)
+        if self.height_ratio == 0.0 {
+            None
+        } else if self.height_ratio == 1.0 {
+            self.content.overlay(layout)
+        } else {
+            let content_layout = layout.children().next().unwrap();
+            self.content.overlay(content_layout)
+        }
     }
 }
 

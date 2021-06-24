@@ -105,13 +105,8 @@ pub struct Fade {
 impl Fade {
     /// current opacity
     pub fn current(&self) -> f32 {
-        let status = self.timeline.status();
-        if status.is_animating() {
-            let (v, _) = self.timeline.value();
-            v
-        } else {
-            Default::default()
-        }
+        let (v, _) = self.timeline.value();
+        v
     }
 }
 

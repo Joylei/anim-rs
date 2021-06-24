@@ -11,8 +11,8 @@ use anim::{
     transition::{fade, fly, slide, Transition},
 };
 use iced::{
-    button, Application, Button, Clipboard, Command, Container, Element, HorizontalAlignment,
-    Length, Space, Subscription, Text, VerticalAlignment,
+    button, Align, Application, Button, Clipboard, Column, Command, Container, Element,
+    HorizontalAlignment, Length, Space, Subscription, Text, VerticalAlignment,
 };
 use std::time::Duration;
 
@@ -37,9 +37,9 @@ impl Application for State {
     type Message = self::Message;
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
-        //let transition = Transitions::Slide(SlideTransition::new());
+        let transition = Transitions::Slide(SlideTransition::new());
         //let transition = Transitions::Fly(FlyTransition::new());
-        let transition = Transitions::Fade(FadeTransition::new());
+        //let transition = Transitions::Fade(FadeTransition::new());
 
         let app = Self { transition };
         (app, Command::none())
@@ -191,7 +191,13 @@ impl SlideTransition {
         .style(style::Button)
         .on_press(Message::Idle);
 
-        self.transition.view(button).into()
+        let column = Column::new()
+            .spacing(10)
+            .align_items(Align::Center)
+            .push(self.transition.view(button))
+            .push(Text::new("--------------------------"));
+
+        column.into()
     }
 
     fn update(&mut self) {
@@ -238,7 +244,13 @@ impl FadeTransition {
             .style(style::FadedButton(self.transition.current()))
             .on_press(Message::Idle);
 
-            button.into()
+            let column = Column::new()
+                .spacing(10)
+                .align_items(Align::Center)
+                .push(button)
+                .push(Text::new("--------------------------"));
+
+            column.into()
         } else {
             Space::new(Length::Units(0), Length::Units(0)).into()
         }
