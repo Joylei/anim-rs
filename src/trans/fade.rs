@@ -99,12 +99,12 @@ impl Default for Parameters {
 /// ```
 #[derive(Debug)]
 pub struct Fade {
-    timeline: Timeline<(f32, bool)>,
+    pub(crate) timeline: Timeline<(f32, bool)>,
 }
 
 impl Fade {
     /// current opacity
-    pub fn current(&self) -> f32 {
+    pub fn opacity(&self) -> f32 {
         let (v, _) = self.timeline.value();
         v
     }

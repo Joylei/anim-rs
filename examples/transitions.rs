@@ -8,7 +8,7 @@
 use anim::{
     easing::{self, EasingMode},
     timeline::{self, Status},
-    transition::{fade, fly, slide, Transition},
+    transition::{fade, fly, slide, Apply, Transition},
 };
 use iced::{
     button, Align, Application, Button, Clipboard, Column, Command, Container, Element,
@@ -46,7 +46,7 @@ impl Application for State {
     }
 
     fn title(&self) -> String {
-        "Map example".to_owned()
+        "Transitions example".to_owned()
     }
 
     fn update(&mut self, message: Self::Message, _clipboard: &mut Clipboard) -> Command<Message> {
@@ -146,7 +146,7 @@ impl FlyTransition {
         )
         .style(style::Button)
         .on_press(Message::Idle);
-        self.transition.view(button)
+        self.transition.apply(button)
     }
 
     fn update(&mut self) {
@@ -194,7 +194,7 @@ impl SlideTransition {
         let column = Column::new()
             .spacing(10)
             .align_items(Align::Center)
-            .push(self.transition.view(button))
+            .push(self.transition.apply(button))
             .push(Text::new("--------------------------"));
 
         column.into()
@@ -241,7 +241,7 @@ impl FadeTransition {
                     .width(Length::Units(100))
                     .height(Length::Units(100)),
             )
-            .style(style::FadedButton(self.transition.current()))
+            .style(style::FadedButton(self.transition.opacity()))
             .on_press(Message::Idle);
 
             let column = Column::new()

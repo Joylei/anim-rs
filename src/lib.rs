@@ -90,8 +90,18 @@ mod iced;
 /// thread local based timeline
 #[cfg(feature = "local")]
 pub mod local;
+/// transitions
+mod trans;
 
 // reexports
 pub use crate::core::*;
-#[cfg(feature = "iced-backend")]
-pub use crate::iced::*;
+
+/// pre-defined transitions
+pub mod transition {
+    #[doc(inline)]
+    pub use crate::trans::*;
+
+    #[cfg(feature = "iced-backend")]
+    #[doc(inline)]
+    pub use crate::iced::Apply;
+}
