@@ -4,7 +4,7 @@
 // Copyright: 2021, Joylei <leingliu@gmail.com>
 // License: MIT
 
-use impl_trait_for_tuples::impl_for_tuples;
+#![allow(non_snake_case)]
 
 ///  generates output values based on its timing progress
 ///
@@ -112,14 +112,40 @@ impl Animatable for char {
 
 //-------- tuples -----------
 
-#[impl_for_tuples(1, 10)]
-impl Animatable for Tuple {
-    for_tuples!( where #( Tuple: Animatable )* );
-
-    fn animate(&self, to: &Self, time: f64) -> Self {
-        for_tuples!( (#( Tuple::animate(&self.Tuple, &to.Tuple, time) ),* ))
+macro_rules! impl_tuple {
+    ($($n:tt $name:ident)+) => {
+        impl<'de, $($name,)+> Animatable for ($($name,)+)
+        where
+            $($name: Animatable,)+
+        {
+            #[inline]
+            fn animate(&self, to: &Self, time: f64) -> Self
+            {
+                $(
+                    let $name = Animatable::animate(&self.$n, &to.$n, time);
+                )+
+                ($($name,)+)
+            }
+        }
     }
 }
+
+impl_tuple!(0 T0);
+impl_tuple!(0 T0 1 T1);
+impl_tuple!(0 T0 1 T1 2 T2);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13 14 T14);
+impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13 14 T14 15 T15);
 
 #[cfg(test)]
 mod test {
