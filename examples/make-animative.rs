@@ -7,19 +7,11 @@
 use anim::{timeline::Status, Animatable, Options, Timeline};
 use std::time::Duration;
 
-#[derive(Clone, Debug)]
+/// make it animatable, do not forget to derive Clone
+#[derive(Clone, Debug, Animatable)]
 struct MyModel {
     a: f32, //animatable
     b: i64, //animatable
-}
-
-// make it animatable, do not forget to derive Clone
-impl Animatable for MyModel {
-    fn animate(&self, to: &Self, time: f64) -> Self {
-        let a = self.a.animate(&to.a, time);
-        let b = self.b.animate(&to.b, time);
-        MyModel { a, b }
-    }
 }
 
 // once it's animatable, you can use it with anim::timeline::Options;

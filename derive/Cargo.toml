@@ -1,0 +1,24 @@
+[package]
+name = "anim-derive"
+version = "0.1.0"
+description = "macros for anim"
+readme = "README.md"
+license = "MIT"
+edition = "2018"
+homepage = "https://github.com/Joylei/anim-rs"
+repository = "https://github.com/Joylei/anim-rs.git"
+documentation = "https://docs.rs/crate/anim/"
+keywords = ["animation", "iced"]
+categories = ["visualization", "gui", "graphics"]
+authors = ["joylei <leingliu@gmail.com>"]
+
+[lib]
+name = "anim_derive"
+path = "src/lib.rs"
+proc-macro = true
+
+[dependencies]
+proc-macro-crate = "1"
+proc-macro2 = "1"
+proc-quote = "0.4"
+syn = { version = "1", features = ["full", "parsing"] }

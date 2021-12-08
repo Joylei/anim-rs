@@ -95,3 +95,5 @@ pub mod local;
 pub use crate::core::*;
 #[cfg(feature = "iced-backend")]
 pub use crate::iced::*;
+
+pub use anim_derive::Animatable;

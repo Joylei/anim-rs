@@ -12,13 +12,17 @@ keywords = ["animation", "iced"]
 categories = ["visualization", "gui", "graphics"]
 authors = ["joylei <leingliu@gmail.com>"]
 
+[workspace]
+members = [".", "derive"]
+
 [features]
-default = ["local", "iced-backend"]
+default = ["local", "iced-backend", "derive"]
 local = ["parking_lot"]
 iced-backend = ["iced_native"]
+derive=["anim-derive"]
 
 [dependencies]
-impl-trait-for-tuples = "0.2"
+anim-derive = {path = "./derive", optional = true}
 dyn-clone = "1"
 iced_native = { version="0.4", optional=true, default-features=false }
 parking_lot = { version="0.11", optional=true }
