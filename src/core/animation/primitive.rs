@@ -42,7 +42,7 @@ impl<T: Animatable> Primitive<T> {
 impl<T: Animatable> BaseAnimation for Primitive<T> {
     type Item = T;
 
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         if let Some(mut duration) = self.duration {
             //apply delay
@@ -63,6 +63,7 @@ impl<T: Animatable> BaseAnimation for Primitive<T> {
         }
     }
 
+    #[inline]
     fn animate(&self, mut elapsed: Duration) -> Self::Item {
         //apply skip
         if let Some(skip) = self.opt.skip {

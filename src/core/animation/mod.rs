@@ -141,7 +141,7 @@ pub trait BaseAnimation {
 /// always output some values.
 pub trait Animation: BaseAnimation {
     /// always delay for specified time when play current animation; negative delay has no effect
-    #[inline(always)]
+    #[inline]
     fn delay(self, delay: Duration) -> Delay<Self>
     where
         Self: Sized,
@@ -150,7 +150,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// always delay for specified time when play current animation
-    #[inline(always)]
+    #[inline]
     fn delay_ms(self, millis: u64) -> Delay<Self>
     where
         Self: Sized,
@@ -161,7 +161,7 @@ pub trait Animation: BaseAnimation {
     /// always move forward for specified time when play current animation
     ///
     /// just a simple wrap on [`Animation::seek`]
-    #[inline(always)]
+    #[inline]
     fn skip(self, progress: Duration) -> Seek<Self>
     where
         Self: Sized,
@@ -174,7 +174,7 @@ pub trait Animation: BaseAnimation {
     /// ## panic
     /// - panics if percent < -1.0 or percent > 1.0
     /// - panics if current animation lasts indefinitely while seeking from end or by percent
-    #[inline(always)]
+    #[inline]
     fn seek(self, seek: SeekFrom) -> Seek<Self>
     where
         Self: Sized,
@@ -189,7 +189,7 @@ pub trait Animation: BaseAnimation {
     /// ## panic
     /// - panics if percent < -1.0 or percent > 1.0
     /// - panics if current animation lasts indefinitely
-    #[inline(always)]
+    #[inline]
     fn seek_by(self, percent: f32) -> Seek<Self>
     where
         Self: Sized,
@@ -198,7 +198,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// map from one type to another
-    #[inline(always)]
+    #[inline]
     fn map<F, T>(self, f: F) -> Map<Self, F, T>
     where
         Self: Sized,
@@ -208,7 +208,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// chain two animations, play in the chained order
-    #[inline(always)]
+    #[inline]
     fn chain<Other>(self, other: Other) -> Chain<Self, Other>
     where
         Self: Sized,
@@ -218,7 +218,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// take specified duration
-    #[inline(always)]
+    #[inline]
     fn take(self, duration: Duration) -> Take<Self>
     where
         Self: Sized,
@@ -236,7 +236,7 @@ pub trait Animation: BaseAnimation {
     /// <0.0 | panics
     ///
     /// see [`Animation::speed_up`]
-    #[inline(always)]
+    #[inline]
     fn scale(self, scale: f32) -> Scale<Self>
     where
         Self: Sized,
@@ -253,7 +253,7 @@ pub trait Animation: BaseAnimation {
     /// <=0.0 | panics
     ///
     /// see [`Animation::scale`]
-    #[inline(always)]
+    #[inline]
     fn speed_up(self, ratio: f32) -> Scale<Self>
     where
         Self: Sized,
@@ -266,7 +266,7 @@ pub trait Animation: BaseAnimation {
     /// repeat animations with specified strategies
     ///
     /// panics if count<0
-    #[inline(always)]
+    #[inline]
     fn repeat(self, repeat: RepeatBehavior) -> Repeat<Self>
     where
         Self: Sized,
@@ -280,7 +280,7 @@ pub trait Animation: BaseAnimation {
     ///
     /// ## panic
     /// panics if count<0
-    #[inline(always)]
+    #[inline]
     fn times(self, count: f32) -> Repeat<Self>
     where
         Self: Sized,
@@ -311,7 +311,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// parallel animations, play at the same time until the longest one finishes
-    #[inline(always)]
+    #[inline]
     fn parallel<Other>(self, other: Other) -> Parallel<Self, Other>
     where
         Self: Sized,
@@ -323,7 +323,7 @@ pub trait Animation: BaseAnimation {
     /// parallel animations, play at the same time until the longest one finishes.
     ///
     /// alias for [`Animation::parallel()`]
-    #[inline(always)]
+    #[inline]
     fn zip<Other>(self, other: Other) -> Parallel<Self, Other>
     where
         Self: Sized,
@@ -334,7 +334,7 @@ pub trait Animation: BaseAnimation {
 
     /// caches animated value, reducing computing while not animating.
     /// you might want to use it at the end of the animation chains
-    #[inline(always)]
+    #[inline]
     fn cached(self) -> Cache<Self>
     where
         Self: Sized,
@@ -344,7 +344,7 @@ pub trait Animation: BaseAnimation {
     }
 
     /// into boxed animation
-    #[inline(always)]
+    #[inline]
     fn boxed(self) -> Boxed<Self::Item>
     where
         Self: Sized + 'static,
@@ -353,18 +353,17 @@ pub trait Animation: BaseAnimation {
     }
 
     /// build [`Timeline`]
-    #[inline(always)]
+    #[inline]
     fn to_timeline(self) -> Timeline<Self::Item>
     where
         Self: Sized + 'static,
         Self::Item: 'static,
     {
-        let timeline = Timeline::new(self);
-        timeline
+        Timeline::new(self)
     }
 
     /// build [`Timeline`] and start to play the animation
-    #[inline(always)]
+    #[inline]
     fn begin_animation(self) -> Timeline<Self::Item>
     where
         Self: Sized + 'static,
@@ -390,7 +389,7 @@ pub(crate) trait IsFinished {
 }
 
 impl<T: Animation> IsFinished for T {
-    #[inline(always)]
+    #[inline]
     fn is_finished(&self, elapsed: Duration) -> bool {
         self.duration().map(|d| elapsed >= d).unwrap_or_default()
     }

@@ -30,7 +30,7 @@ impl From<Duration> for KeyTime {
 impl From<f32> for KeyTime {
     #[inline]
     fn from(percent: f32) -> Self {
-        assert!(percent >= 0.0 && percent <= 1.0);
+        assert!((0.0..=1.0).contains(&percent));
         Self::Percent(percent)
     }
 }
@@ -118,7 +118,7 @@ impl<T: Clone> Clone for KeyFrame<T> {
     fn clone(&self) -> Self {
         Self {
             value: self.value.clone(),
-            key_time: self.key_time.clone(),
+            key_time: self.key_time,
             easing: dyn_clone::clone_box(&*self.easing),
         }
     }
@@ -150,7 +150,7 @@ impl<T> KeyFrameInner<T> {
             }),
             KeyTime::Percent(percent) => {
                 // filter out invalid values
-                assert!(percent >= 0.0 && percent <= 1.0);
+                assert!((0.0..=1.0).contains(&percent));
                 Some(KeyFrameInner {
                     value: src.value,
                     key_time: duration.mul_f32(percent),
@@ -165,7 +165,7 @@ impl<T: Clone> Clone for KeyFrameInner<T> {
     fn clone(&self) -> Self {
         Self {
             value: self.value.clone(),
-            key_time: self.key_time.clone(),
+            key_time: self.key_time,
             easing: dyn_clone::clone_box(&*self.easing),
         }
     }
@@ -202,6 +202,7 @@ impl<T: Animatable> BaseAnimation for KeyFrameAnimation<T> {
         Some(self.duration)
     }
 
+    #[inline]
     fn animate(&self, elapsed: Duration) -> Self::Item {
         if elapsed < self.duration {
             let mut last = None;
@@ -238,6 +239,7 @@ impl<T: Animatable> Builder<T> {
         self
     }
 
+    #[inline]
     pub fn build(self) -> KeyFrameAnimation<T> {
         //find max duration, so we can sort frames later
         let max_duration = self
@@ -248,8 +250,7 @@ impl<T: Animatable> Builder<T> {
                 KeyTime::Percent(_) => None,
             })
             .max()
-            .or_else(|| Some(DEFAULT_ANIMATION_DURATION))
-            .unwrap();
+            .unwrap_or(DEFAULT_ANIMATION_DURATION);
 
         //dbg!(max_duration);
 
@@ -259,7 +260,7 @@ impl<T: Animatable> Builder<T> {
             .into_iter()
             .filter_map(|frame| KeyFrameInner::cvt_from(frame, &max_duration))
             .collect();
-        assert!(key_frames.len() > 0);
+        assert!(!key_frames.is_empty());
         key_frames.sort_by_key(|x| x.key_time);
         KeyFrameAnimation {
             key_frames,

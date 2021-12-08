@@ -12,7 +12,7 @@ pub struct Boxed<T>(Box<dyn Animation<Item = T>>);
 
 impl<T> Boxed<T> {
     /// construct [`Boxed`]
-    #[inline(always)]
+    #[inline]
     pub(crate) fn new<F>(src: F) -> Self
     where
         F: Animation<Item = T> + 'static,
@@ -23,12 +23,12 @@ impl<T> Boxed<T> {
 
 impl<T> BaseAnimation for Boxed<T> {
     type Item = T;
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         self.0.duration()
     }
 
-    #[inline(always)]
+    #[inline]
     fn animate(&self, elapsed: Duration) -> Self::Item {
         self.0.animate(elapsed)
     }

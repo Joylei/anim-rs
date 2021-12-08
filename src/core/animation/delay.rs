@@ -16,12 +16,12 @@ pub struct Delay<T: Animation> {
 }
 
 impl<T: Animation> Delay<T> {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(src: T, delay: Duration) -> Self {
         Self { src, delay }
     }
 
-    #[inline(always)]
+    #[inline]
     fn delay(&self) -> Duration {
         if self.delay > DURATION_ZERO {
             self.delay
@@ -33,12 +33,12 @@ impl<T: Animation> Delay<T> {
 
 impl<T: Animation> BaseAnimation for Delay<T> {
     type Item = T::Item;
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         self.src.duration().map(|d| self.delay() + d)
     }
 
-    #[inline(always)]
+    #[inline]
     fn animate(&self, elapsed: Duration) -> Self::Item {
         let delay = self.delay();
         let elapsed = if elapsed > delay {

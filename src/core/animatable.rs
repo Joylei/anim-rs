@@ -15,17 +15,15 @@ pub trait Animatable: Sized + Clone {
 }
 
 //-------- primitives -----------
-
-#[doc(hidden)]
 macro_rules! impl_primitive {
-    ($t:ident) => {
-        impl Animatable for $t {
+    ($ty:ident) => {
+        impl Animatable for $ty {
             #[inline]
             fn animate(&self, to: &Self, time: f64) -> Self {
                 if time == 0.0 {
                     return *self;
                 }
-                if time == 1.0 {
+                if (1.0 - time).abs() < f64::EPSILON {
                     return *to;
                 }
                 if self == to {
@@ -41,17 +39,17 @@ macro_rules! impl_primitive {
             }
         }
     };
-    ($t:ident, float) => {
-        impl Animatable for $t {
+    ($ty:ident, float) => {
+        impl Animatable for $ty {
             #[inline]
             fn animate(&self, to: &Self, time: f64) -> Self {
                 if time == 0.0 {
                     return *self;
                 }
-                if time == 1.0 {
+                if (1.0 - time).abs() < f64::EPSILON {
                     return *to;
                 }
-                if self == to {
+                if (self - to).abs() < $ty::EPSILON {
                     return *self;
                 }
                 crate::utils::check_time(time);
@@ -79,6 +77,7 @@ impl_primitive!(f32, float);
 impl_primitive!(f64, float);
 
 impl Animatable for bool {
+    #[inline]
     fn animate(&self, to: &Self, time: f64) -> Self {
         if time < 1.0 {
             *self
@@ -89,6 +88,7 @@ impl Animatable for bool {
 }
 
 impl Animatable for char {
+    #[inline]
     fn animate(&self, to: &Self, time: f64) -> Self {
         if self == to {
             return *self;

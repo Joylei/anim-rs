@@ -15,7 +15,7 @@ pub struct Take<T: Animation> {
 }
 
 impl<T: Animation> Take<T> {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(src: T, duration: Duration) -> Self {
         Take { src, duration }
     }
@@ -23,7 +23,7 @@ impl<T: Animation> Take<T> {
 
 impl<T: Animation> BaseAnimation for Take<T> {
     type Item = T::Item;
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         if self.duration > DURATION_ZERO {
             if let Some(duration) = self.src.duration() {

@@ -24,7 +24,7 @@ where
     T: Animation,
     T::Item: Clone,
 {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(src: T) -> Self {
         Self {
             src,
@@ -40,7 +40,7 @@ where
 {
     type Item = T::Item;
 
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         self.src.duration()
     }

@@ -34,6 +34,7 @@ where
 /// update current thread associated [`Timeline`]s
 ///
 /// you should call it only in one place
+#[inline]
 pub fn update() {
     MANAGER.with(|m| m.update());
 }
@@ -50,6 +51,7 @@ pub(crate) struct Inner<T> {
 }
 
 impl<T> TimelineWrapper<T> {
+    #[inline]
     fn new(timeline: CoreTimeline<T>, shared: Shared) -> Self {
         Self {
             id: timeline.id(),
@@ -60,7 +62,7 @@ impl<T> TimelineWrapper<T> {
             shared,
         }
     }
-
+    #[inline]
     fn scheduled(&self) -> bool {
         let state = self.inner.lock();
         state.scheduled
@@ -188,6 +190,7 @@ impl<T> TimelineControl for Rc<Mutex<Inner<T>>> {
 struct Shared(Rc<RwLock<HashMap<TimelineId, Box<dyn TimelineControl + 'static>>>>);
 
 impl Shared {
+    #[inline]
     fn update(&self) {
         let mut holder = Vec::new();
         let state = self.0.upgradable_read();
@@ -205,6 +208,7 @@ impl Shared {
         }
     }
 
+    #[inline]
     fn schedule(&self, timeline: impl TimelineControl + 'static) {
         let id = timeline.id();
         let state = self.0.upgradable_read();
@@ -215,6 +219,7 @@ impl Shared {
         }
     }
 
+    #[inline]
     fn cancel(&self, id: TimelineId) -> bool {
         let res = {
             let state = self.0.upgradable_read();

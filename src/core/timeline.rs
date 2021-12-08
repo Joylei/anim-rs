@@ -33,22 +33,22 @@ pub enum Status {
 
 impl Status {
     /// is animation idle?
-    #[inline(always)]
+    #[inline]
     pub fn is_idle(&self) -> bool {
         self == &Status::Idle
     }
     /// is animation in progress?
-    #[inline(always)]
+    #[inline]
     pub fn is_animating(&self) -> bool {
         self == &Status::Animating
     }
     /// is animation paused?
-    #[inline(always)]
+    #[inline]
     pub fn is_paused(&self) -> bool {
         self == &Status::Paused
     }
     /// is animation completed?
-    #[inline(always)]
+    #[inline]
     pub fn is_completed(&self) -> bool {
         self == &Status::Completed
     }
@@ -134,18 +134,10 @@ impl<T> Timeline<T> {
     /// pause your animation only if it's animating
     #[inline]
     pub fn pause(&mut self) {
-        match self.state {
-            State::Animating { time, elapsed } => {
-                let elapsed = if let Some(elapsed) = elapsed {
-                    elapsed + time.elapsed()
-                } else {
-                    time.elapsed()
-                };
-                self.state = State::Paused {
-                    elapsed: Some(elapsed),
-                };
-            }
-            _ => {}
+        if let State::Animating { time, elapsed } = self.state {
+            self.state = State::Paused {
+                elapsed: Some(elapsed.unwrap_or_default() + time.elapsed()),
+            };
         }
     }
 
@@ -158,7 +150,6 @@ impl<T> Timeline<T> {
                     time: Instant::now(),
                     elapsed,
                 };
-                return;
             }
             _ => self.begin(),
         }
@@ -167,11 +158,8 @@ impl<T> Timeline<T> {
     /// if animation was stopped, it might keep its progress, you can clear it by this method
     #[inline]
     pub fn reset(&mut self) {
-        match self.state {
-            State::Completed { .. } => {
-                self.state = State::Completed { elapsed: None };
-            }
-            _ => {}
+        if let State::Completed { .. } = self.state {
+            self.state = State::Completed { elapsed: None };
         }
     }
 
@@ -187,6 +175,7 @@ impl<T> Timeline<T> {
     }
 
     /// the current value of your animation
+    #[inline]
     pub fn value(&self) -> T {
         match self.state {
             State::Idle => self.animation.animate(DURATION_ZERO),
@@ -216,6 +205,7 @@ impl<T> Timeline<T> {
     }
 
     /// update the timeline
+    #[inline]
     pub fn update_with_time(&mut self, now: Instant) -> Status {
         match self.state {
             State::Idle => Status::Idle,

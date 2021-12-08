@@ -16,7 +16,7 @@ pub struct Repeat<T: Animation> {
 }
 
 impl<T: Animation> Repeat<T> {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(src: T, repeat: RepeatBehavior) -> Self {
         let duration = src.duration().and_then(|duration| {
             if duration == DURATION_ZERO {
@@ -40,7 +40,7 @@ impl<T: Animation> Repeat<T> {
 
 impl<T: Animation> BaseAnimation for Repeat<T> {
     type Item = T::Item;
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         self.duration
     }

@@ -177,7 +177,7 @@ impl<T: Animatable> Options<T> {
     }
 
     /// build [`Animation`]
-    #[inline(always)]
+    #[inline]
     pub fn build(self) -> impl Animation<Item = T> + Clone {
         Primitive::new(self)
     }

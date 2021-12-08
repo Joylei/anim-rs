@@ -148,11 +148,9 @@ where
         if self.interval == DURATION_ZERO {
             return Some(DURATION_ZERO);
         }
-        if let Some(size) = self.src.size() {
-            Some(self.interval.mul_f64(size as f64))
-        } else {
-            None
-        }
+        self.src
+            .size()
+            .map(|size| self.interval.mul_f64(size as f64))
     }
 
     #[inline]

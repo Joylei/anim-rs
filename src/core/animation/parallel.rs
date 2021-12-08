@@ -15,7 +15,7 @@ pub struct Parallel<A, B> {
 }
 
 impl<A, B> Parallel<A, B> {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(first: A, second: B) -> Self {
         Self { first, second }
     }

@@ -15,7 +15,7 @@ pub struct Scale<T: Animation> {
 }
 
 impl<T: Animation> Scale<T> {
-    #[inline(always)]
+    #[inline]
     pub(super) fn new(src: T, scale: f32) -> Self {
         assert!(scale >= 0.0);
         Self { src, scale }
@@ -24,7 +24,7 @@ impl<T: Animation> Scale<T> {
 
 impl<T: Animation> BaseAnimation for Scale<T> {
     type Item = T::Item;
-    #[inline(always)]
+    #[inline]
     fn duration(&self) -> Option<Duration> {
         self.src.duration().map(|duration| {
             if duration == DURATION_ZERO || self.scale == 0.0 {

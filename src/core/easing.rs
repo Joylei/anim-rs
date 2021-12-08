@@ -14,7 +14,7 @@ pub trait Function: DynClone {
 }
 
 impl<F: Function + Clone> Function for Box<F> {
-    #[inline(always)]
+    #[inline]
     fn ease(&self, normalized_time: f64) -> f64 {
         (**self).ease(normalized_time)
     }
@@ -152,7 +152,7 @@ mod functions {
             if t == 0.0 {
                 0.0
             } else {
-                (2.0 as f64).powf(10.0 * t - 10.0)
+                (2.0_f64).powf(10.0 * t - 10.0)
             }
         })
     }
@@ -176,10 +176,10 @@ mod functions {
         custom(|t| {
             if t == 0.0 {
                 0.0
-            } else if t == 1.0 {
+            } else if (1.0 - t).abs() < f64::EPSILON {
                 1.0
             } else {
-                -(2.0 as f64).powf(10.0 * t - 10.0) * ((t * 10.0 - 10.75) * C4).sin()
+                -(2.0_f64.powf(10.0 * t - 10.0) * ((t * 10.0 - 10.75) * C4).sin())
             }
         })
     }

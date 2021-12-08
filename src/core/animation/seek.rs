@@ -42,7 +42,7 @@ impl<T: Animation> Seek<T> {
                 }
             }
             SeekFrom::Percent(percent) => {
-                assert!(percent >= -1.0 && percent <= 1.0);
+                assert!((-1.0..=1.0).contains(&percent));
                 if let Some(duration) = src.duration() {
                     if percent < 0.0 {
                         duration.mul_f32(1.0 + percent)
@@ -71,7 +71,7 @@ impl<T: Animation> BaseAnimation for Seek<T> {
         })
     }
 
-    #[inline(always)]
+    #[inline]
     fn animate(&self, elapsed: Duration) -> Self::Item {
         let elapsed = self.progress + elapsed;
         self.src.animate(elapsed)

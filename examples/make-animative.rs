@@ -43,4 +43,6 @@ fn main() {
         let value = timeline.value();
         println!("animated: {:?}", value);
     }
+    let value = timeline.value();
+    println!("animated: {:?}", value);
 }
