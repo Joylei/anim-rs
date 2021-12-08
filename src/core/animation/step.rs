@@ -8,6 +8,8 @@ use std::time::Duration;
 /// - `Vec<T>`
 /// - `[T]`
 /// - `&[T]`
+/// - `Box<T>` where `T:Cursor`
+/// - `&T` where `T:Cursor`
 pub trait Cursor {
     /// item of the cursor
     type Item;
@@ -20,9 +22,11 @@ pub trait Cursor {
 
 impl<T: Clone> Cursor for [T] {
     type Item = T;
+    #[inline]
     fn size(&self) -> Option<usize> {
         Some(self.len())
     }
+    #[inline]
     fn index(&self, n: usize) -> T {
         self[n].to_owned()
     }
@@ -30,9 +34,11 @@ impl<T: Clone> Cursor for [T] {
 
 impl<T: Clone> Cursor for &[T] {
     type Item = T;
+    #[inline]
     fn size(&self) -> Option<usize> {
         Some(self.len())
     }
+    #[inline]
     fn index(&self, n: usize) -> T {
         self[n].to_owned()
     }
@@ -40,11 +46,37 @@ impl<T: Clone> Cursor for &[T] {
 
 impl<T: Clone> Cursor for Vec<T> {
     type Item = T;
+    #[inline]
     fn size(&self) -> Option<usize> {
         Some(self.len())
     }
+    #[inline]
     fn index(&self, n: usize) -> T {
         self[n].to_owned()
+    }
+}
+
+impl<T: Cursor> Cursor for &T {
+    type Item = T::Item;
+    #[inline]
+    fn size(&self) -> Option<usize> {
+        (**self).size()
+    }
+    #[inline]
+    fn index(&self, n: usize) -> Self::Item {
+        (**self).index(n)
+    }
+}
+
+impl<T: Cursor> Cursor for Box<T> {
+    type Item = T::Item;
+    #[inline]
+    fn size(&self) -> Option<usize> {
+        (**self).size()
+    }
+    #[inline]
+    fn index(&self, n: usize) -> Self::Item {
+        (**self).index(n)
     }
 }
 
