@@ -6,9 +6,32 @@
 
 #![allow(non_snake_case)]
 
+use std::marker::PhantomData;
+
 ///  generates output values based on its timing progress
 ///
 /// see [`crate::Timeline`]
+///
+/// Types derives [`Animatable`]:
+/// - `bool`
+/// - `i8`
+/// - `u8`
+/// - `i16`
+/// - `u16`
+/// - `i32`
+/// - `u32`
+/// - `i64`
+/// - `u64`
+/// - `f32`
+/// - `f64`
+/// - `i128`
+/// - `u168`
+/// - `Unit`
+/// - `Tuple`
+/// - `Char`
+/// - `Option<T>` where `T:Animatable`
+/// - `PhantomData<T>`
+/// - `[T;N]` where `T:Animatable`
 pub trait Animatable: Sized + Clone {
     /// generates output values based on its timing progress
     fn animate(&self, to: &Self, time: f64) -> Self;
@@ -110,6 +133,40 @@ impl Animatable for char {
     }
 }
 
+impl Animatable for () {
+    #[inline]
+    fn animate(&self, _to: &Self, _time: f64) -> Self {}
+}
+
+impl<T> Animatable for PhantomData<T> {
+    #[inline]
+    fn animate(&self, _to: &Self, _time: f64) -> Self {
+        Default::default()
+    }
+}
+
+impl<T: Animatable> Animatable for Option<T> {
+    #[inline]
+    fn animate(&self, to: &Self, time: f64) -> Self {
+        match (self, to) {
+            (Some(a), Some(b)) => Some(a.animate(b, time)),
+            _ => None,
+        }
+    }
+}
+
+impl<T: Animatable, const N: usize> Animatable for [T; N] {
+    #[inline]
+    fn animate(&self, to: &Self, time: f64) -> Self {
+        let mut res = self.clone();
+        self.iter()
+            .zip(to.iter())
+            .zip(res.iter_mut())
+            .for_each(|((a, b), c)| *c = a.animate(b, time));
+        res
+    }
+}
+
 //-------- tuples -----------
 
 macro_rules! impl_tuple {
@@ -146,18 +203,6 @@ impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T
 impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13);
 impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13 14 T14);
 impl_tuple!(0 T0 1 T1 2 T2 3 T3 4 T4 5 T5 6 T6 7 T7 8 T8 9 T9 10 T10 11 T11 12 T12 13 T13 14 T14 15 T15);
-
-impl<T: Animatable, const N: usize> Animatable for [T; N] {
-    #[inline]
-    fn animate(&self, to: &Self, time: f64) -> Self {
-        let mut res = self.clone();
-        self.iter()
-            .zip(to.iter())
-            .zip(res.iter_mut())
-            .for_each(|((a, b), c)| *c = a.animate(b, time));
-        res
-    }
-}
 
 #[cfg(test)]
 mod test {
