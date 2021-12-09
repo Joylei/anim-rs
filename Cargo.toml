@@ -19,13 +19,13 @@ members = [".", "derive"]
 default = ["local", "iced-backend", "derive"]
 local = ["parking_lot"]
 iced-backend = ["iced_native"]
-derive=["anim-derive"]
+derive = ["anim-derive"]
 
 [dependencies]
-anim-derive = {path = "./derive", optional = true, version = "0.1"}
+anim-derive = { path = "./derive", optional = true, version = "0.1" }
 dyn-clone = "1"
-iced_native = { version="0.4", optional=true, default-features=false }
-parking_lot = { version="0.11", optional=true }
+iced_native = { version = "0.4", optional = true, default-features = false }
+parking_lot = { version = "0.11", optional = true }
 
 [dev-dependencies]
-iced = { version="0.3", features=["tokio", "canvas"] }
+iced = { version = "0.3", features = ["tokio", "canvas"] }
