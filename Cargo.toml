@@ -1,6 +1,6 @@
 [package]
 name = "anim"
-version = "0.1.2"
+version = "0.1.3"
 description = "A framework independent animation library for rust, works nicely with Iced and the others"
 readme = "README.md"
 license = "MIT"
