@@ -22,7 +22,7 @@ iced-backend = ["iced_native"]
 derive=["anim-derive"]
 
 [dependencies]
-anim-derive = {path = "./derive", optional = true}
+anim-derive = {path = "./derive", optional = true, version = "0.1"}
 dyn-clone = "1"
 iced_native = { version="0.4", optional=true, default-features=false }
 parking_lot = { version="0.11", optional=true }

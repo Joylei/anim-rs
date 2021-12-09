@@ -28,7 +28,7 @@ use std::marker::PhantomData;
 /// - `u168`
 /// - `Unit`
 /// - `Tuple`
-/// - `Char`
+/// - `char`
 /// - `Option<T>` where `T:Animatable`
 /// - `PhantomData<T>`
 /// - `[T;N]` where `T:Animatable`
