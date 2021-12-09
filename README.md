@@ -1,3 +1,5 @@
+[EN](./README.md) | [中文](./README_zh.md)
+
 # anim
 [![Test and Build](https://github.com/joylei/anim-rs/workflows/Test%20and%20Build/badge.svg?branch=master)](https://github.com/joylei/anim-rs/actions?query=workflow%3A%22Test+and+Build%22)
 [![Documentation](https://docs.rs/anim/badge.svg)](https://docs.rs/anim)
