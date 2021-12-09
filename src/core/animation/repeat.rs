@@ -11,7 +11,6 @@ use std::time::Duration;
 #[derive(Debug, Clone)]
 pub struct Repeat<T: Animation> {
     src: T,
-    repeat: RepeatBehavior,
     duration: Option<Duration>,
 }
 
@@ -30,11 +29,7 @@ impl<T: Animation> Repeat<T> {
                 RepeatBehavior::Forever => None,
             }
         });
-        Self {
-            src,
-            repeat,
-            duration,
-        }
+        Self { src, duration }
     }
 }
 
