@@ -15,6 +15,8 @@ pub mod timeline;
 /// utilities
 pub mod utils;
 
+mod clock;
+
 use std::time::Duration;
 
 #[doc(inline)]
