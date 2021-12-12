@@ -14,7 +14,17 @@ use iced::{
 use iced_native::button;
 use std::time::Duration;
 
+#[cfg(windows)]
+#[link(name = "Winmm")]
+extern "system" {
+    fn timeBeginPeriod(uPeriod: u32) -> i32;
+}
+
 fn main() {
+    #[cfg(windows)]
+    unsafe {
+        timeBeginPeriod(1)
+    };
     State::run(Default::default()).unwrap();
 }
 
