@@ -189,25 +189,28 @@ impl<T, C: Clock> Timeline<T, C> {
         }
     }
 
+    #[inline]
+    fn elapsed(&self) -> Option<Duration> {
+        match &self.state {
+            State::Idle => None,
+            State::Animating { time, elapsed } => {
+                let duration = self.clock.now() - time.clone();
+                if let Some(elapsed) = elapsed {
+                    Some(*elapsed + duration)
+                } else {
+                    Some(duration)
+                }
+            }
+            State::Paused { elapsed } => elapsed.clone(),
+            State::Completed { elapsed, .. } => elapsed.clone(),
+        }
+    }
+
     /// the current value of your animation
     #[inline]
     pub fn value(&self) -> T {
-        match &self.state {
-            State::Idle => self.animation.animate(DURATION_ZERO),
-            State::Animating { time, elapsed } => {
-                let duration = self.clock.now() - time.clone();
-                let elapsed = elapsed.unwrap_or_default() + duration;
-                self.animation.animate(elapsed)
-            }
-            State::Paused { elapsed } => self.animation.animate(elapsed.unwrap_or(DURATION_ZERO)),
-            State::Completed { elapsed, .. } => {
-                if let Some(elapsed) = elapsed {
-                    self.animation.animate(*elapsed)
-                } else {
-                    self.animation.animate(DURATION_ZERO)
-                }
-            }
-        }
+        let duration = self.elapsed().unwrap_or(DURATION_ZERO);
+        self.animation.animate(duration)
     }
 
     /// update the status of the timeline
