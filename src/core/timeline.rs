@@ -86,9 +86,9 @@ pub struct Timeline<T, C: Clock = DefaultClock> {
 impl<T, C: Clock> Timeline<T, C> {
     /// construct your animation
     #[inline]
-    pub fn new<F>(animation: F) -> Self
+    pub fn new<A>(animation: A) -> Self
     where
-        F: Animation<Item = T> + 'static,
+        A: Animation<Item = T> + 'static,
     {
         Self {
             id: ID_GEN.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
@@ -246,7 +246,6 @@ impl<T, C: Clock> Timeline<T, C> {
 impl<T: Animation + 'static> From<T> for Timeline<T::Item> {
     #[inline]
     fn from(src: T) -> Self {
-        let src = Boxed::new(src);
         Timeline::new(src)
     }
 }
