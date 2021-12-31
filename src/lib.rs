@@ -96,4 +96,5 @@ pub use crate::core::*;
 #[cfg(feature = "iced-backend")]
 pub use crate::iced::*;
 
+#[cfg(feature = "derive")]
 pub use anim_derive::Animatable;
